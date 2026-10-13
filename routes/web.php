@@ -14,6 +14,9 @@ Route::post('/login', [LoginController::class, 'doLogin'])->name('doLogin');
 
 
 Route::prefix('admin')->middleware('authCheck')->group(function () {
+    Route::get('/', function () {
+        return redirect()->route('dashboard');
+    });
     Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
     Route::get('/dashboard', [DashboardController::class, 'dashboard'])->name('dashboard');
 
