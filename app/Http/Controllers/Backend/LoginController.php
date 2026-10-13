@@ -16,23 +16,24 @@ class LoginController extends Controller
     }
 
 
-    public function doLogin(Request $request){ // for dashboard
-        $credentials = [
-            'email' =>  $request->input('email'),
-            'password' =>  $request->input('password'),
-        ];
 
+    public function doLogin(Request $request)
+    {
+        $request->validate([
+            'email'    => 'required|email',
+            'password' => 'required',
+        ]);
 
-        $login = Auth::attempt($credentials);
-        if($login){
+        $credentials = $request->only('email', 'password');
+
+        if (Auth::attempt($credentials)) {
+            $request->session()->regenerate();
             return redirect()->route('dashboard');
-        }else{
-            Session::flash('failed', 'Login Failed');
-            return redirect()->back();
         }
 
-
+        return back()->with('failed', 'Invalid email or password');
     }
+
 
 
     public function logout()
