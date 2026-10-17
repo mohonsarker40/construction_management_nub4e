@@ -3,9 +3,9 @@
 namespace App\Http\Controllers\Backend;
 
 use App\Http\Controllers\Controller;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Session;
 
 class LoginController extends Controller
 {
@@ -19,12 +19,7 @@ class LoginController extends Controller
 
     public function doLogin(Request $request)
     {
-        $request->validate([
-            'email'    => 'required|email',
-            'password' => 'required',
-        ]);
-
-        $credentials = $request->only('email', 'password');
+        $credentials = User::validatedCredentials($request);
 
         if (Auth::attempt($credentials)) {
             $request->session()->regenerate();
