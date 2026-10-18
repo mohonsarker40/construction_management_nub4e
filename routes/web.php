@@ -1,6 +1,9 @@
 <?php
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Backend\DashboardController;
+use App\Http\Controllers\Backend\RoleController;
+use App\Http\Controllers\Backend\UserController;
+use App\Http\Controllers\Backend\ClientController;
 use \App\Http\Controllers\Backend\LoginController;
 use \App\Http\Controllers\FrontendController;
 
@@ -20,9 +23,11 @@ Route::prefix('admin')->middleware('authCheck')->group(function () {
     Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
     Route::get('/dashboard', [DashboardController::class, 'dashboard'])->name('dashboard');
 
-
-   // Routes will be here...
-
+    Route::name('admin.')->middleware('adminOnly')->group(function () {
+        Route::resource('roles', RoleController::class);
+        Route::resource('users', UserController::class);
+        Route::resource('clients', ClientController::class)->except(['show']);
+    });
 });
 
 
