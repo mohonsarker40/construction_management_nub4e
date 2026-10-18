@@ -490,3 +490,10 @@
 #2 /var/www/construction_management_nub4e/storage/framework/lsp-fe17c89233861001.php(294): class@anonymous->all()
 #3 {main}
 "} 
+[2026-10-18 09:01:24] local.ERROR: class@anonymous::loadConfig(): Return value must be of type ?PHPUnit\TextUI\XmlConfiguration\LoadedFromFileConfiguration, PHPUnit\TextUI\XmlConfiguration\Configuration returned {"exception":"[object] (TypeError(code: 0): class@anonymous::loadConfig(): Return value must be of type ?PHPUnit\\TextUI\\XmlConfiguration\\LoadedFromFileConfiguration, PHPUnit\\TextUI\\XmlConfiguration\\Configuration returned at /var/www/construction_management_nub4e/storage/framework/lsp-c6adb043f91a36a1.php:166)
+[stacktrace]
+#0 /var/www/construction_management_nub4e/storage/framework/lsp-c6adb043f91a36a1.php(128): class@anonymous->loadConfig()
+#1 /var/www/construction_management_nub4e/storage/framework/lsp-c6adb043f91a36a1.php(75): class@anonymous->getTestSuites()
+#2 /var/www/construction_management_nub4e/storage/framework/lsp-c6adb043f91a36a1.php(294): class@anonymous->all()
+#3 {main}
+"} 
