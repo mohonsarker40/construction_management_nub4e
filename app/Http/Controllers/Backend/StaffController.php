@@ -3,83 +3,79 @@
 namespace App\Http\Controllers\Backend;
 
 use App\Http\Controllers\Controller;
+use App\Models\Staff;
 use Illuminate\Http\Request;
+use Illuminate\Database\QueryException;
 
 class StaffController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
     public function index()
     {
-        //
+        $records = Staff::orderByDesc('id')->paginate(10);
+
+        return view('Backend.staffManagement.index', compact('records'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
     public function create()
     {
-        //
+        return redirect()->route('admin.staffManagement.index');
     }
 
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
     public function store(Request $request)
     {
-        //
+        $validated = $request->validate([
+            'full_name'      => 'required|string|max:255',
+            'phone'          => 'required|string|max:30',
+            'email'          => 'nullable|email|max:255',
+            'designation'    => 'nullable|string|max:255',
+            'specialization' => 'nullable|string|max:255',
+            'daily_rate'     => 'nullable|numeric|min:0',
+            'status'         => 'required|in:0,1',
+        ]);
+
+        Staff::create($validated);
+
+        return redirect()
+            ->route('admin.staffManagement.index')
+            ->with('success', 'Staff added successfully.');
     }
 
-    /**
-     * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function show($id)
+    public function edit(Staff $staff)
     {
-        //
+        return redirect()->route('admin.staffManagement.index');
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function edit($id)
+    public function update(Request $request, Staff $staff)
     {
-        //
+        $validated = $request->validate([
+            'full_name'      => 'required|string|max:255',
+            'phone'          => 'required|string|max:30',
+            'email'          => 'nullable|email|max:255',
+            'designation'    => 'nullable|string|max:255',
+            'specialization' => 'nullable|string|max:255',
+            'daily_rate'     => 'nullable|numeric|min:0',
+            'status'         => 'required|in:0,1',
+        ]);
+
+        $staff->update($validated);
+
+        return redirect()
+            ->route('admin.staffManagement.index')
+            ->with('success', 'Staff updated successfully.');
     }
 
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, $id)
+    public function destroy(Staff $staff)
     {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy($id)
-    {
-        //
+        try {
+            $staff->delete();
+            return redirect()
+                ->route('admin.staffManagement.index')
+                ->with('success', 'Staff deleted successfully.');
+        } catch (QueryException $e) {
+            Log::error('Staff deletion failed', ['staff_id' => $staff->id, 'error' => $e->getMessage(),]);
+            return redirect()
+                ->route('admin.staffManagement.index')
+                ->with('error', 'Staff cannot be deleted because related records exist.');
+        }
     }
 }

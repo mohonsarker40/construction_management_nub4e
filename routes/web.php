@@ -1,4 +1,6 @@
 <?php
+
+use App\Http\Controllers\Backend\StaffController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Backend\DashboardController;
 use App\Http\Controllers\Backend\RoleController;
@@ -27,7 +29,7 @@ Route::prefix('admin')->middleware('authCheck')->group(function () {
         Route::resource('roles', RoleController::class);
         Route::resource('users', UserController::class);
         Route::resource('clients', ClientController::class)->except(['show']);
-    });
+        Route::resource('staffManagement', StaffController::class)->parameters(['staffManagement' => 'staff'])->except(['show']);});
 });
 
 

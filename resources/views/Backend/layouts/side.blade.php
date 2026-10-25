@@ -39,7 +39,7 @@
                 <a class="collapse-item" href="{{ route('admin.roles.index') }}"><i class="fas fa-circle"></i><span>Roles</span></a>
                 <a class="collapse-item" href="{{ route('admin.users.index') }}"><i class="fas fa-circle"></i><span>Users</span></a>
                 <a class="collapse-item" href="{{ route('admin.clients.index') }}"><i class="fas fa-circle"></i><span>Client Management</span></a>
-                <a class="collapse-item" href="#"><i class="fas fa-circle"></i><span>Staff Management</span></a>
+                <a class="collapse-item" href="{{ route('admin.staffManagement.index') }}"><i class="fas fa-circle"></i><span>Staff Management</span></a>
                 <a class="collapse-item" href="#"><i class="fas fa-circle"></i><span>Suppliers</span></a>
                 <a class="collapse-item" href="#"><i class="fas fa-circle"></i><span>Materials</span></a>
             </div></div>
