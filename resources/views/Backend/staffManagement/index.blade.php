@@ -37,6 +37,7 @@
                     <table class="table table-bordered table-hover" width="100%">
                         <thead class="thead-light">
                         <tr>
+                            <th>SI</th>
                             <th>Name</th>
                             <th>Email</th>
                             <th>Phone</th>
@@ -51,6 +52,7 @@
                         <tbody>
                         @forelse($records as $record)
                             <tr>
+                                <td>{{ $records->firstItem() + $loop->index }}</td>
                                 <td>{{ $record->full_name }}</td>
                                 <td>{{ $record->email ?: '—' }}</td>
                                 <td>{{ $record->phone ?: '—' }}</td>
