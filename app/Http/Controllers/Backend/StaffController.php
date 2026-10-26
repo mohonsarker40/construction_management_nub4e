@@ -21,6 +21,7 @@ class StaffController extends Controller
         return redirect()->route('admin.staffManagement.index');
     }
 
+
     public function store(Request $request)
     {
         $validated = $request->validate([
@@ -33,12 +34,16 @@ class StaffController extends Controller
             'status'         => 'required|in:0,1',
         ]);
 
+        // Logged-in user's ID
+        $validated['user_id'] = auth()->id();
+
         Staff::create($validated);
 
         return redirect()
             ->route('admin.staffManagement.index')
             ->with('success', 'Staff added successfully.');
     }
+
 
     public function edit(Staff $staff)
     {
