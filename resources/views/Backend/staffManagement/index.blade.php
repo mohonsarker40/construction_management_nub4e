@@ -84,7 +84,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="8" class="text-center text-muted py-4">
+                                <td colspan="12" class="text-center text-muted py-4">
                                     No staff members found.
                                 </td>
                             </tr>
@@ -135,9 +135,7 @@
                                 </div>
                             </div>
                             <div class="form-group row align-items-center">
-                                <label for="email" class="col-md-4 col-form-label">
-                                    Email Address
-                                </label>
+                                <label for="email" class="col-md-4 col-form-label">Email Address<span class="text-danger">*</span></label>
                                 <div class="col-md-8">
                                     <input type="email" name="email" id="email" class="form-control" value="{{ old('email') }}" placeholder="Enter email address">
                                 </div>

@@ -24,12 +24,12 @@ class Staff extends Model
     public static function validatedData(Request $request): array
     {
         return $request->validate([
-            'full_name'      => ['required', 'string', 'max:120'],
+            'full_name'      => ['required', 'string', 'max:100'],
             'phone'          => ['required', 'string', 'max:20'],
-            'email'          => ['nullable', 'email', 'max:255'],
-            'specialization' => ['nullable', 'string', 'max:255'],
+            'email'          => ['required', 'email', 'max:100'],
+            'specialization' => ['nullable', 'string', 'max:100'],
             'daily_rate'     => ['nullable', 'numeric', 'min:0'],
-            'designation'    => ['nullable', 'string', 'max:255'],
+            'designation'    => ['nullable', 'string', 'max:50'],
             'status'         => ['required', 'boolean'],
         ]);
     }}

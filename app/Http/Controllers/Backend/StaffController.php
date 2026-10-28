@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Staff;
 use Illuminate\Http\Request;
 use Illuminate\Database\QueryException;
+use Illuminate\Support\Facades\Log;
 
 class StaffController extends Controller
 {
@@ -25,14 +26,15 @@ class StaffController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'full_name'      => 'required|string|max:255',
-            'phone'          => 'required|string|max:30',
-            'email'          => 'nullable|email|max:255',
-            'designation'    => 'nullable|string|max:255',
-            'specialization' => 'nullable|string|max:255',
+            'full_name'      => 'required|string|max:100',
+            'phone'          => 'required|string|max:20',
+            'email'          => 'required|email|max:100',
+            'designation'    => 'nullable|string|max:50',
+            'specialization' => 'nullable|string|max:100',
             'daily_rate'     => 'nullable|numeric|min:0',
             'status'         => 'required|in:0,1',
         ]);
+
 
         // Logged-in user's ID
         $validated['user_id'] = auth()->id();
@@ -53,11 +55,11 @@ class StaffController extends Controller
     public function update(Request $request, Staff $staff)
     {
         $validated = $request->validate([
-            'full_name'      => 'required|string|max:255',
-            'phone'          => 'required|string|max:30',
-            'email'          => 'nullable|email|max:255',
-            'designation'    => 'nullable|string|max:255',
-            'specialization' => 'nullable|string|max:255',
+            'full_name'      => 'required|string|max:100',
+            'phone'          => 'required|string|max:20',
+            'email'          => 'required|email|max:100',
+            'designation'    => 'nullable|string|max:50',
+            'specialization' => 'nullable|string|max:100',
             'daily_rate'     => 'nullable|numeric|min:0',
             'status'         => 'required|in:0,1',
         ]);
