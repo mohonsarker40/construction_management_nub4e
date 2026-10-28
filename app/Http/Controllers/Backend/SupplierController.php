@@ -26,14 +26,14 @@ class SupplierController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'supplier_name'      => 'required|string|max:255',
-            'contact_person'      => 'required|string|max:255',
-            'phone'          => 'required|string|max:30',
-            'email'          => 'nullable|email|max:255',
-            'city'    => 'nullable|string|max:255',
-            'address' => 'nullable|string|max:255',
-            'gst_number'     => 'nullable|numeric|min:0',
-            'status'         => 'required|in:0,1',
+            'supplier_name'      => 'required|string|max:120',
+            'contact_person'     => 'required|string|max:100',
+            'phone'              => 'required|string|max:20',
+            'email'              => 'nullable|email|max:100',
+            'city'               => 'nullable|string|max:50',
+            'address'            => 'nullable|string|max:255',
+            'gst_number'         => 'nullable|string|max:50',
+            'status'             => 'required|in:0,1',
         ]);
 
         // Logged-in user's ID
@@ -55,14 +55,14 @@ class SupplierController extends Controller
     public function update(Request $request, Supplier $supplier)
     {
         $validated = $request->validate([
-            'supplier_name'      => 'required|string|max:255',
-            'contact_person'      => 'required|string|max:255',
-            'phone'          => 'required|string|max:30',
-            'email'          => 'nullable|email|max:255',
-            'city'    => 'nullable|string|max:255',
-            'address' => 'nullable|string|max:255',
-            'gst_number'     => 'nullable|numeric|min:0',
-            'status'         => 'required|in:0,1',
+            'supplier_name'      => 'required|string|max:120',
+            'contact_person'     => 'required|string|max:100',
+            'phone'              => 'required|string|max:20',
+            'email'              => 'nullable|email|max:100',
+            'city'               => 'nullable|string|max:50',
+            'address'            => 'nullable|string|max:255',
+            'gst_number'         => 'nullable|string|max:50',
+            'status'             => 'required|in:0,1',
         ]);
 
         $supplier->update($validated);

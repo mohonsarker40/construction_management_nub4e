@@ -39,9 +39,9 @@
                         <tr>
                             <th>SI</th>
                             <th>Supplier Name</th>
-                            <th>Contact Person</th>
-                            <th>Email</th>
                             <th>Phone</th>
+                            <th>Email</th>
+                            <th>Contact Person</th>
                             <th>City</th>
                             <th>Address</th>
                             <th>GST Number</th>
@@ -55,9 +55,9 @@
                             <tr>
                                 <td>{{ $records->firstItem() + $loop->index }}</td>
                                 <td>{{ $record->supplier_name }}</td>
-                                <td>{{ $record->contact_person }}</td>
-                                <td>{{ $record->email ?: '—' }}</td>
                                 <td>{{ $record->phone ?: '—' }}</td>
+                                <td>{{ $record->email ?: '—' }}</td>
+                                <td>{{ $record->contact_person }}</td>
                                 <td>{{ $record->city ?: '—' }}</td>
                                 <td>{{ $record->address ?: '—' }}</td>
                                 <td>{{ $record->gst_number ?? '—' }}</td>
@@ -87,8 +87,8 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="8" class="text-center text-muted py-4">
-                                    No staff members found.
+                                <td colspan="12" class="text-center text-muted py-4">
+                                    No suppliers found.
                                 </td>
                             </tr>
                         @endforelse
@@ -132,23 +132,21 @@
                                 </div>
                             </div>
                             <div class="form-group row align-items-center">
-                                <label for="full_name" class="col-md-4 col-form-label">Contact Person <span class="text-danger">*</span></label>
-                                <div class="col-md-8">
-                                    <input type="text" name="contact_person" id="contact_person" class="form-control" value="{{ old('contact_person') }}" placeholder="Enter Contact Person" required>
-                                </div>
-                            </div>
-                            <div class="form-group row align-items-center">
                                 <label for="phone" class="col-md-4 col-form-label">Phone Number<span class="text-danger">*</span></label>
                                 <div class="col-md-8">
                                     <input type="text" name="phone" id="phone" class="form-control" value="{{ old('phone') }}" placeholder="Enter phone number">
                                 </div>
                             </div>
                             <div class="form-group row align-items-center">
-                                <label for="email" class="col-md-4 col-form-label">
-                                    Email Address
-                                </label>
+                                <label for="email" class="col-md-4 col-form-label">Email Address</label>
                                 <div class="col-md-8">
                                     <input type="email" name="email" id="email" class="form-control" value="{{ old('email') }}" placeholder="Enter email address">
+                                </div>
+                            </div>
+                            <div class="form-group row align-items-center">
+                                <label for="full_name" class="col-md-4 col-form-label">Contact Person</label>
+                                <div class="col-md-8">
+                                    <input type="text" name="contact_person" id="contact_person" class="form-control" value="{{ old('contact_person') }}" placeholder="Enter Contact Person" required>
                                 </div>
                             </div>
 
@@ -187,7 +185,7 @@
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-light" data-dismiss="modal">Cancel</button>
-                        <button type="submit" class="btn btn-primary"><i class="fas fa-save mr-1"></i><span id="submitButtonText">Save Staff</span></button>
+                        <button type="submit" class="btn btn-primary"><i class="fas fa-save mr-1"></i><span id="submitButtonText">Save Supplier</span></button>
                     </div>
 
                 </form>

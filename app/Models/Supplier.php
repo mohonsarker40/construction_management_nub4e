@@ -25,11 +25,11 @@ class Supplier extends Model
     {
         return $request->validate([
             'supplier_name'      => ['required', 'string', 'max:120'],
-            'contact_person'      => ['required', 'string', 'max:120'],
+            'contact_person'      => ['required', 'string', 'max:100'],
             'phone'          => ['required', 'string', 'max:20'],
-            'email'          => ['nullable', 'email', 'max:255'],
-            'city'           => ['nullable', 'string', 'max:255'],
-            'gst_number'       => ['nullable', 'numeric', 'min:0'],
+            'email'          => ['nullable', 'email', 'max:100'],
+            'city'           => ['nullable', 'string', 'max:50'],
+            'gst_number'       => ['nullable', 'string', 'max:50'],
             'address'    => ['nullable', 'string', 'max:255'],
             'status'         => ['required', 'boolean'],
         ]);
