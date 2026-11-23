@@ -2,6 +2,9 @@
 
 namespace App\Models;
 
+use App\Models\Client\Client;
+use App\Models\Project\Project;
+use App\Models\RBAC\Role;
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -14,14 +17,11 @@ class User extends Authenticatable
 {
     use HasApiTokens, HasFactory, Notifiable;
 
-
-    protected $fillable = ['role_id', 'full_name', 'email', 'password_hash', 'phone', 'status',];
-
+    protected $fillable = ['role_id', 'full_name', 'email', 'password_hash', 'phone', 'status'];
 
     protected $hidden = ['password_hash'];
-//        'password',
-//        'remember_token',
-
+    //        'password',
+    //        'remember_token',
 
     public function role()
     {

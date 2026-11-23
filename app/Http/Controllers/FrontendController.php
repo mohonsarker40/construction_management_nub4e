@@ -2,11 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Frontend;
-use App\Models\Booking;
-use App\Models\BookingRequest;
-use App\Models\Client;
-use App\Models\Project;
+use App\Models\Booking\Booking;
+use App\Models\Booking\BookingRequest;
+use App\Models\Client\Client;
+use App\Models\Project\Project;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -16,28 +15,35 @@ use Illuminate\Validation\ValidationException;
 
 class FrontendController extends Controller
 {
-
     public function index()
     {
         $projects = Project::whereNotNull('actual_end_date')->orderBy('project_name')->get()->map(function ($project) {
             $project->frontend_units = $this->freeUnits($project);
+
             return $project;
         });
+
         return view('homepage', compact('projects'));
     }
 
     public function bookingRequestForm()
     {
-        if (!auth()->check()) return redirect()->route('client.register.form')->with('notice', 'ফ্ল্যাট কেনার আগে ক্লায়েন্ট হিসেবে নিবন্ধন করে অনুমোদনের অপেক্ষা করুন।');
+        if (! auth()->check()) {
+            return redirect()->route('client.register.form')->with('notice', 'ফ্ল্যাট কেনার আগে ক্লায়েন্ট হিসেবে নিবন্ধন করে অনুমোদনের অপেক্ষা করুন।');
+        }
         abort_unless((int) auth()->user()->role_id === 8, 403);
-        if ((int) auth()->user()->status !== 1) return view('frontend.client-pending');
+        if ((int) auth()->user()->status !== 1) {
+            return view('frontend.client-pending');
+        }
         $client = Client::where('user_id', auth()->id())->where('status', 1)->firstOrFail();
 
         $projects = Project::with(['manager', 'designer'])->whereNotNull('actual_end_date')->orderBy('project_name')->get()->map(function ($project) {
             $project->frontend_units = $this->freeUnits($project);
+
             return $project;
         })->filter(fn ($project) => count($project->frontend_units) > 0)->values();
         $selectedProjectId = request()->query('project_id');
+
         return view('frontend.booking-request', compact('projects', 'client', 'selectedProjectId'));
     }
 
@@ -71,6 +77,7 @@ class FrontendController extends Controller
             ->whereIn('status', [BookingRequest::PENDING_MANAGER, BookingRequest::PENDING_ACCOUNTANT, BookingRequest::APPROVED])
             ->pluck('unit_label')->map(fn ($label) => strtolower($label));
         $booked = Booking::where('project_id', $project->id)->pluck('unit_label')->map(fn ($label) => strtolower($label));
+
         return collect($project->listedUnits())
             ->reject(fn ($unit) => $reserved->contains(strtolower($unit['label'])) || $booked->contains(strtolower($unit['label'])))
             ->values()->all();
@@ -84,11 +91,11 @@ class FrontendController extends Controller
 
         $bookingRequest = DB::transaction(function () use ($data, $client) {
             $project = Project::whereKey($data['project_id'])->lockForUpdate()->firstOrFail();
-            if (!$project->actual_end_date) {
+            if (! $project->actual_end_date) {
                 throw ValidationException::withMessages(['project_id' => 'প্রজেক্ট সম্পন্ন না হওয়া পর্যন্ত ফ্ল্যাট কেনার অনুরোধ করা যাবে না।']);
             }
             $listedUnit = collect($project->listedUnits())->first(fn ($unit) => strtolower($unit['label']) === strtolower($data['unit_label']));
-            if (!$listedUnit || (float) $listedUnit['price'] !== (float) $data['agreed_amount']) {
+            if (! $listedUnit || (float) $listedUnit['price'] !== (float) $data['agreed_amount']) {
                 throw ValidationException::withMessages(['unit_label' => 'নির্বাচিত ফ্ল্যাট বা দাম সঠিক নয়। আবার ফ্ল্যাটটি নির্বাচন করুন।']);
             }
             $data['unit_label'] = $listedUnit['label'];
@@ -99,7 +106,7 @@ class FrontendController extends Controller
                 ->where('unit_label', $data['unit_label'])
                 ->whereIn('status', [BookingRequest::PENDING_MANAGER, BookingRequest::PENDING_ACCOUNTANT, BookingRequest::APPROVED])
                 ->exists();
-            if (!$unitAlreadyRequested) {
+            if (! $unitAlreadyRequested) {
                 $unitAlreadyRequested = BookingRequest::where('project_id', $project->id)
                     ->whereIn('status', [BookingRequest::PENDING_MANAGER, BookingRequest::PENDING_ACCOUNTANT, BookingRequest::APPROVED])
                     ->pluck('unit_label')->contains(fn ($label) => strtolower($label) === $unitKey);
@@ -110,7 +117,7 @@ class FrontendController extends Controller
             }
 
             return BookingRequest::create([
-                'request_no' => 'BR-' . now()->format('ymd') . '-' . Str::upper(Str::random(6)),
+                'request_no' => 'BR-'.now()->format('ymd').'-'.Str::upper(Str::random(6)),
                 'project_id' => $project->id,
                 'client_id' => $client->id,
                 'unit_label' => $data['unit_label'],
@@ -149,46 +156,10 @@ class FrontendController extends Controller
             ->whereHas('client', fn ($query) => $query->where('email', $data['email']))
             ->first();
 
-        if (!$bookingRequest) {
+        if (! $bookingRequest) {
             return back()->withErrors(['request_no' => 'No request matches that number and email.'])->withInput();
         }
 
         return view('frontend.request-status', compact('bookingRequest'));
-    }
-
-
-    public function create()
-    {
-        //
-    }
-
-
-    public function store(Request $request)
-    {
-        //
-    }
-
-
-    public function show(Frontend $fronted)
-    {
-        //
-    }
-
-
-    public function edit(Frontend $fronted)
-    {
-        //
-    }
-
-
-    public function update(Request $request, Frontend $fronted)
-    {
-        //
-    }
-
-
-    public function destroy(Frontend $fronted)
-    {
-        //
     }
 }

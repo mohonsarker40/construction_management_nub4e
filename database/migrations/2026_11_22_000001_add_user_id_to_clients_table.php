@@ -6,14 +6,14 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    public function up()
+    public function up(): void
     {
         Schema::table('clients', function (Blueprint $table) {
             $table->foreignId('user_id')->nullable()->unique()->constrained('users');
         });
     }
 
-    public function down()
+    public function down(): void
     {
         Schema::table('clients', function (Blueprint $table) {
             $table->dropForeign(['user_id']);

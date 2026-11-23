@@ -1,12 +1,12 @@
 <?php
 
-namespace App\Http\Controllers\Backend;
+namespace App\Http\Controllers\Backend\Client;
 
 use App\Http\Controllers\Controller;
-use App\Models\Client;
+use App\Models\Client\Client;
 use App\Models\User;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class ClientController extends Controller
 {
@@ -28,7 +28,7 @@ class ClientController extends Controller
         $data = $request->validate([
             'client_name' => ['required', 'string', 'max:120'],
             'contact_person' => ['nullable', 'string', 'max:100'],
-            'email' => ['nullable', 'email', 'max:100', 'unique:clients,email,' . $client->id],
+            'email' => ['nullable', 'email', 'max:100', 'unique:clients,email,'.$client->id],
             'phone' => ['required', 'string', 'max:20'],
             'address' => ['nullable', 'string', 'max:255'],
             'status' => ['required', 'in:0,1'],
@@ -84,8 +84,11 @@ class ClientController extends Controller
                 'phone' => $account->phone ?: 'Not provided',
                 'status' => 1,
             ];
-            if ($client) $client->update($details);
-            else Client::create($details);
+            if ($client) {
+                $client->update($details);
+            } else {
+                Client::create($details);
+            }
             $account->update(['status' => 1]);
         });
 

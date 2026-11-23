@@ -5,13 +5,13 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    public function up()
+    public function up(): void
     {
         Schema::dropIfExists('staff');
         Schema::dropIfExists('suppliers');
     }
 
-    public function down()
+    public function down(): void
     {
         // Staff and suppliers are intentionally not part of this project.
     }

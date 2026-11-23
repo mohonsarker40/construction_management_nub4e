@@ -3,13 +3,13 @@
 namespace App\Http\Controllers\Backend;
 
 use App\Http\Controllers\Controller;
-use App\Models\Booking;
-use App\Models\BookingRequest;
-use App\Models\Client;
-use App\Models\ClientPayment;
-use App\Models\Expense;
-use App\Models\Project;
-use Illuminate\Http\Request;
+use App\Models\Booking\Booking;
+use App\Models\Booking\BookingRequest;
+use App\Models\Booking\ClientPayment;
+use App\Models\Client\Client;
+use App\Models\Finance\Expense;
+use App\Models\Project\Project;
+use Illuminate\Support\Carbon;
 
 class DashboardController extends Controller
 {
@@ -20,8 +20,12 @@ class DashboardController extends Controller
         $clientId = $roleId === 8 ? Client::where('user_id', $user->id)->value('id') : null;
 
         $projectsQuery = Project::query();
-        if ($roleId === 2) $projectsQuery->where('manager_user_id', $user->id);
-        if ($roleId === 4) $projectsQuery->where('designer_user_id', $user->id);
+        if ($roleId === 2) {
+            $projectsQuery->where('manager_user_id', $user->id);
+        }
+        if ($roleId === 4) {
+            $projectsQuery->where('designer_user_id', $user->id);
+        }
         if ($roleId === 8) {
             $projectIdsForClient = Booking::where('client_id', $clientId)->pluck('project_id')
                 ->merge(BookingRequest::where('client_id', $clientId)->pluck('project_id'))->unique();
@@ -49,7 +53,7 @@ class DashboardController extends Controller
         $approvedPayments = (clone $paymentsQuery)->where('status', ClientPayment::APPROVED)->get(['amount', 'payment_date']);
         $from = now()->startOfMonth()->subMonths(5);
         $monthlyPayments = $approvedPayments->filter(fn ($payment) => $payment->payment_date >= $from->toDateString())
-            ->groupBy(fn ($payment) => \Illuminate\Support\Carbon::parse($payment->payment_date)->format('Y-m'));
+            ->groupBy(fn ($payment) => Carbon::parse($payment->payment_date)->format('Y-m'));
         $monthlyLabels = [];
         $monthlyIncome = [];
         for ($month = $from->copy(); $month <= now()->startOfMonth(); $month->addMonth()) {
@@ -73,41 +77,5 @@ class DashboardController extends Controller
         ];
 
         return view('Backend.dashboard', compact('summary', 'requestCounts', 'monthlyLabels', 'monthlyIncome'));
-    }
-
-    public function index()
-    {
-
-    }
-
-    public function create()
-    {
-        //
-    }
-
-    public function store(Request $request)
-    {
-        //
-    }
-
-    public function show($id)
-    {
-        //
-    }
-
-    public function edit($id)
-    {
-        //
-    }
-
-
-    public function update(Request $request, $id)
-    {
-        //
-    }
-
-    public function destroy($id)
-    {
-        //
     }
 }

@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Backend;
 
 use App\Http\Controllers\Controller;
-use App\Models\Role;
+use App\Models\RBAC\Role;
 use App\Models\User;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;

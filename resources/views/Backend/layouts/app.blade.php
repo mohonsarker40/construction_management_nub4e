@@ -9,7 +9,7 @@
     <meta name="description" content="">
     <meta name="author" content="">
 
-    <title>Admin Dashboard</title>
+    <title>{{ (int) auth()->user()->role_id === 8 ? 'Client Dashboard' : 'Admin Dashboard' }}</title>
 
     <!-- Custom fonts for this template-->
     <link href="{{ asset('Backend/vendor/fontawesome-free/css/all.min.css') }}" rel="stylesheet" type="text/css">

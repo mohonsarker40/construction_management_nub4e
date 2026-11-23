@@ -12,7 +12,7 @@ class DatabaseSeeder extends Seeder
     {
         $this->call([
             RoleTableSeeder::class,
-            BookingWorkflowDemoSeeder::class,
+            // BookingWorkflowDemoSeeder::class,
         ]);
     }
 }

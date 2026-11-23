@@ -1,15 +1,20 @@
 <?php
 
-namespace App\Models;
+namespace App\Models\Booking;
 
+use App\Models\Client\Client;
+use App\Models\Project\Project;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 
 class BookingRequest extends Model
 {
     public const PENDING_MANAGER = 'pending_manager';
+
     public const PENDING_ACCOUNTANT = 'pending_accountant';
+
     public const APPROVED = 'approved';
+
     public const REJECTED = 'rejected';
 
     protected $fillable = [
@@ -34,7 +39,18 @@ class BookingRequest extends Model
         ]);
     }
 
-    public function project() { return $this->belongsTo(Project::class); }
-    public function client() { return $this->belongsTo(Client::class); }
-    public function booking() { return $this->hasOne(Booking::class); }
+    public function project()
+    {
+        return $this->belongsTo(Project::class);
+    }
+
+    public function client()
+    {
+        return $this->belongsTo(Client::class);
+    }
+
+    public function booking()
+    {
+        return $this->hasOne(Booking::class);
+    }
 }

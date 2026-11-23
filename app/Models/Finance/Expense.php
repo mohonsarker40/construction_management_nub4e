@@ -1,18 +1,23 @@
 <?php
 
-namespace App\Models;
+namespace App\Models\Finance;
 
+use App\Models\Project\Project;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 
 class Expense extends Model
 {
     public const MATERIALS = 1;
+
     public const LABOR = 2;
+
     public const OVERHEAD = 3;
+
     public const OTHER = 4;
 
     protected $table = 'expenses';
+
     protected $fillable = ['project_id', 'category', 'amount', 'expense_date', 'description', 'recorded_by'];
 
     public static function validatedData(Request $request): array
@@ -26,5 +31,8 @@ class Expense extends Model
         ]);
     }
 
-    public function project() { return $this->belongsTo(Project::class); }
+    public function project()
+    {
+        return $this->belongsTo(Project::class);
+    }
 }

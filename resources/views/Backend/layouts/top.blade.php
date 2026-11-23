@@ -6,6 +6,7 @@
                         <i class="fa fa-bars"></i>
                     </button>
 
+                    @if((int) auth()->user()->role_id !== 8)
                     <!-- Topbar Search -->
                     <form
                         class="d-none d-sm-inline-block form-inline mr-auto ml-md-3 my-2 my-md-0 mw-100 navbar-search">
@@ -19,9 +20,11 @@
                             </div>
                         </div>
                     </form>
+                    @endif
 
                     <!-- Topbar Navbar -->
                     <ul class="navbar-nav ml-auto">
+                    @if((int) auth()->user()->role_id !== 8)
 
                         <!-- Nav Item - Search Dropdown (Visible Only XS) -->
                         <li class="nav-item dropdown no-arrow d-sm-none">
@@ -163,6 +166,7 @@
                                 <a class="dropdown-item text-center small text-gray-500" href="#">Read More Messages</a>
                             </div>
                         </li>
+                    @endif
 
                         <div class="topbar-divider d-none d-sm-block"></div>
 
@@ -176,15 +180,17 @@
                             <!-- Dropdown - User Information -->
                             <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in"
                                 aria-labelledby="userDropdown">
-                                <a class="dropdown-item" href="#">
-                                    <i class="fas fa-user fa-sm fa-fw mr-2 text-gray-400"></i>
-                                    Profile
-                                </a>
-                                <a class="dropdown-item" href="#">
-                                    <i class="fas fa-cogs fa-sm fa-fw mr-2 text-gray-400"></i>
-                                    Settings
-                                </a>
-                                <div class="dropdown-divider"></div>
+                                @if((int) auth()->user()->role_id !== 8)
+                                    <a class="dropdown-item" href="#">
+                                        <i class="fas fa-user fa-sm fa-fw mr-2 text-gray-400"></i>
+                                        Profile
+                                    </a>
+                                    <a class="dropdown-item" href="#">
+                                        <i class="fas fa-cogs fa-sm fa-fw mr-2 text-gray-400"></i>
+                                        Settings
+                                    </a>
+                                    <div class="dropdown-divider"></div>
+                                @endif
 
                                 <form method="post" action="{{ route('logout') }}">
                                     @csrf

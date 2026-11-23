@@ -1,36 +1,40 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Backend\Booking\BookingWorkflowController;
+use App\Http\Controllers\Backend\Client\ClientController;
+use App\Http\Controllers\Backend\Client\ClientDashboardController;
 use App\Http\Controllers\Backend\DashboardController;
-use App\Http\Controllers\Backend\RoleController;
+use App\Http\Controllers\Backend\LoginController;
+use App\Http\Controllers\Backend\RBAC\RoleController;
 use App\Http\Controllers\Backend\UserController;
-use App\Http\Controllers\Backend\ClientController;
-use App\Http\Controllers\Backend\BookingWorkflowController;
-use \App\Http\Controllers\Backend\LoginController;
-use \App\Http\Controllers\FrontendController;
+use App\Http\Controllers\FrontendController;
+use Illuminate\Support\Facades\Route;
 
+Route::get('/', [FrontendController::class, 'index']);
 
-Route::prefix('/')->group(function () {
-    Route::get('/', [FrontendController::class, 'index']);
+Route::controller(FrontendController::class)->group(function () {
+    Route::get('/client-register', 'clientRegisterForm')->name('client.register.form');
+    Route::post('/client-register', 'clientRegister')->middleware('throttle:5,1')->name('client.register');
+    Route::get('/booking-request', 'bookingRequestForm')->name('booking.request.form');
+    Route::post('/booking-request', 'submitBookingRequest')->middleware('throttle:10,1')->name('booking.request.submit');
+    Route::get('/request-status', 'requestStatusForm')->name('booking.request.status.form');
+    Route::post('/request-status', 'requestStatus')->middleware('throttle:10,1')->name('booking.request.status');
 });
 
-Route::get('/login', [LoginController::class, 'index'])->name('login');
-Route::post('/login', [LoginController::class, 'doLogin'])->name('doLogin');
-Route::get('/client-register', [FrontendController::class, 'clientRegisterForm'])->name('client.register.form');
-Route::post('/client-register', [FrontendController::class, 'clientRegister'])->middleware('throttle:5,1')->name('client.register');
-Route::get('/booking-request', [FrontendController::class, 'bookingRequestForm'])->name('booking.request.form');
-Route::post('/booking-request', [FrontendController::class, 'submitBookingRequest'])->middleware('throttle:10,1')->name('booking.request.submit');
-Route::get('/request-status', [FrontendController::class, 'requestStatusForm'])->name('booking.request.status.form');
-Route::post('/request-status', [FrontendController::class, 'requestStatus'])->middleware('throttle:10,1')->name('booking.request.status');
+Route::controller(LoginController::class)->group(function () {
+    Route::get('/login', 'index')->name('login');
+    Route::post('/login', 'doLogin')->name('doLogin');
+});
 
+Route::get('/client/dashboard', [ClientDashboardController::class, 'index'])
+    ->middleware('authCheck')->name('client.dashboard');
 
 Route::prefix('admin')->middleware('authCheck')->group(function () {
-    Route::get('/', function () {
-        return redirect()->route('dashboard');
-    }); 
+    Route::get('/', fn () => redirect()->route('dashboard'));
     Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
     Route::get('/dashboard', [DashboardController::class, 'dashboard'])->name('dashboard');
-    Route::patch('/clients/registrations/{user}/approve', [ClientController::class, 'approveRegistration'])->middleware('adminOnly')->name('admin.clients.registrations.approve');
+    Route::patch('/clients/registrations/{user}/approve', [ClientController::class, 'approveRegistration'])
+        ->middleware('adminOnly')->name('admin.clients.registrations.approve');
 
     Route::get('/booking-requests', [BookingWorkflowController::class, 'index'])->name('booking-requests.index');
     Route::get('/projects', [BookingWorkflowController::class, 'projectIndex'])->name('projects.index');
@@ -53,7 +57,4 @@ Route::prefix('admin')->middleware('authCheck')->group(function () {
         Route::put('/clients/{client}', [ClientController::class, 'update'])->name('clients.update');
         Route::delete('/clients/{client}', [ClientController::class, 'destroy'])->name('clients.destroy');
     });
-
 });
-
-

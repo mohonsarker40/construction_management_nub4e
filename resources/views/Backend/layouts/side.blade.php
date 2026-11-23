@@ -5,27 +5,29 @@
 <!-- Sidebar -->
 <ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar">
     <!-- Sidebar Brand -->
-    <a class="sidebar-brand d-flex align-items-center justify-content-center" href="{{ route('dashboard') }}">
+    <a class="sidebar-brand d-flex align-items-center justify-content-center" href="{{ $roleId === 8 ? route('client.dashboard') : route('dashboard') }}">
         <div class="sidebar-brand-icon rotate-n-15">
             <i class="fas fa-building"></i>
         </div>
         <div class="sidebar-brand-text mx-3">Construction Management</div>
     </a>
 
-    <!-- Sidebar Search -->
-    <div class="sidebar-search px-3 py-3">
-        <div class="input-group">
-            <input type="text" class="form-control sidebar-search-input" id="sidebarSearch" placeholder="Search menu..." autocomplete="off">
-            <div class="input-group-append">
-                <span class="input-group-text sidebar-search-icon"><i class="fas fa-search"></i></span>
+    @if($roleId !== 8)
+        <!-- Sidebar Search -->
+        <div class="sidebar-search px-3 py-3">
+            <div class="input-group">
+                <input type="text" class="form-control sidebar-search-input" id="sidebarSearch" placeholder="Search menu..." autocomplete="off">
+                <div class="input-group-append">
+                    <span class="input-group-text sidebar-search-icon"><i class="fas fa-search"></i></span>
+                </div>
             </div>
         </div>
-    </div>
+    @endif
     <hr class="sidebar-divider my-0">
 
     <!-- Dashboard -->
-    <li class="nav-item {{ request()->routeIs('dashboard') ? 'active' : '' }}">
-        <a class="nav-link" href="{{ route('dashboard') }}">
+    <li class="nav-item {{ request()->routeIs('dashboard', 'client.dashboard') ? 'active' : '' }}">
+        <a class="nav-link" href="{{ $roleId === 8 ? route('client.dashboard') : route('dashboard') }}">
             <i class="fas fa-fw fa-tachometer-alt"></i>
             <span>Dashboard</span>
         </a>
@@ -93,12 +95,10 @@
         <li class="nav-item"><a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseAccountBookings" aria-expanded="false" aria-controls="collapseAccountBookings"><i class="fas fa-fw fa-handshake"></i><span>Client Bookings</span></a><div id="collapseAccountBookings" class="collapse" data-parent="#accordionSidebar"><div class="collapse-inner rounded"><a class="collapse-item" href="{{ route('booking-requests.index') }}"><i class="fas fa-circle"></i><span>Requests &amp; Payments</span></a></div></div></li>
     @elseif($roleId === 8)
         <li class="nav-item">
-            <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseClientProjects" aria-expanded="false" aria-controls="collapseClientProjects"><i class="fas fa-fw fa-building"></i><span>My Projects</span></a>
+            <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseClientProjects" aria-expanded="false" aria-controls="collapseClientProjects"><i class="fas fa-fw fa-building"></i><span>My Flats</span></a>
             <div id="collapseClientProjects" class="collapse" data-parent="#accordionSidebar"><div class="collapse-inner rounded">
-                <a class="collapse-item" href="{{ route('reports.finance') }}"><i class="fas fa-circle"></i><span>My Bookings &amp; Payments</span></a>
+                <a class="collapse-item" href="{{ route('client.dashboard') }}"><i class="fas fa-circle"></i><span>My Bookings &amp; Payments</span></a>
                 <a class="collapse-item" href="{{ route('booking.request.form') }}"><i class="fas fa-circle"></i><span>Buy a Flat</span></a>
-                <a class="collapse-item" href="#"><i class="fas fa-circle"></i><span>Milestones</span></a>
-                <a class="collapse-item" href="#"><i class="fas fa-circle"></i><span>Project Documents</span></a>
             </div></div>
         </li>
     @endif

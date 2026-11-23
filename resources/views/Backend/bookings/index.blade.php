@@ -148,7 +148,9 @@
                             <tr>
                                 <th>Project</th>
                                 <th>Expected Completion</th>
+                                <th>Budget</th>
                                 <th>Recorded Expenses to Date</th>
+                                <th>Budget Remaining</th>
                                 <th>Work Completed</th>
                             </tr>
                         </thead>
@@ -160,7 +162,9 @@
                                         <small>{{ $project->location }}</small>
                                     </td>
                                     <td>{{ $project->estimated_end_date?->format('d M Y') ?? '—' }}</td>
+                                    <td>৳ {{ number_format($project->budget, 2) }}</td>
                                     <td>৳ {{ number_format($project->expenses_sum_amount ?? 0, 2) }}</td>
+                                    <td>৳ {{ number_format($project->budget - ($project->expenses_sum_amount ?? 0), 2) }}</td>
                                     <td>
                                         <form method="post" action="{{ route('projects.completion', $project) }}" class="form-inline">
                                             @csrf @method('PATCH')
@@ -176,7 +180,7 @@
 
                             @empty
                                 <tr>
-                                    <td colspan="4" class="text-center text-muted">No projects have been assigned to you.</td>
+                                    <td colspan="6" class="text-center text-muted">No projects have been assigned to you.</td>
                                 </tr>
                             @endforelse
                         </tbody>
@@ -229,7 +233,7 @@
                                     @endif
                                 </td>
                                 <td class="text-nowrap">
-                                    @if($bookingRequest->status === \App\Models\BookingRequest::PENDING_MANAGER && in_array($roleId, [1, 2], true))
+                                    @if($bookingRequest->status === \App\Models\Booking\BookingRequest::PENDING_MANAGER && in_array($roleId, [1, 2], true))
                                         <form method="post" action="{{ route('booking-requests.manager-review', $bookingRequest) }}" class="mb-1">
                                             @csrf @method('PATCH')
                                             <input type="hidden" name="decision" value="approve">
@@ -241,7 +245,7 @@
                                             <input name="rejection_note" class="form-control form-control-sm mb-1" placeholder="Reason (optional)">
                                             <button class="btn btn-sm btn-outline-danger">Reject</button>
                                         </form>
-                                    @elseif($bookingRequest->status === \App\Models\BookingRequest::PENDING_ACCOUNTANT && $roleId === 7)
+                                    @elseif($bookingRequest->status === \App\Models\Booking\BookingRequest::PENDING_ACCOUNTANT && $roleId === 7)
                                         <form method="post" action="{{ route('booking-requests.accountant-review', $bookingRequest) }}" class="mb-1">
                                             @csrf @method('PATCH')
                                             <input type="hidden" name="decision" value="approve">
@@ -279,7 +283,7 @@
                         <div class="form-row">
                             <div class="form-group col-md-4">
                                 <label>Booking</label>
-                                <select name="booking_id" class="form-control" required><option value="">Choose booking</option>@foreach($bookings as $booking)@php($reservedPaid = $booking->payments->whereIn('status', [\App\Models\ClientPayment::APPROVED, \App\Models\ClientPayment::PENDING])->sum('amount'))<option value="{{ $booking->id }}">{{ $booking->client->client_name }} — {{ $booking->project->project_name }} / {{ $booking->unit_label }} (Balance ৳{{ number_format($booking->agreed_amount - $reservedPaid, 2) }})</option>@endforeach</select></div>
+                                <select name="booking_id" class="form-control" required><option value="">Choose booking</option>@foreach($bookings as $booking)@php($reservedPaid = $booking->payments->whereIn('status', [\App\Models\Booking\ClientPayment::APPROVED, \App\Models\Booking\ClientPayment::PENDING])->sum('amount'))<option value="{{ $booking->id }}">{{ $booking->client->client_name }} — {{ $booking->project->project_name }} / {{ $booking->unit_label }} (Balance ৳{{ number_format($booking->agreed_amount - $reservedPaid, 2) }})</option>@endforeach</select></div>
                             <div class="form-group col-md-2">
                                 <label>Amount (৳)</label>
                                 <input name="amount" type="number" min="0.01" step="0.01" class="form-control" required></div>
@@ -355,43 +359,41 @@
                     <h6 class="m-0 font-weight-bold text-primary">Record project expense</h6>
                 </div>
                 <div class="card-body">
-                    <p class="text-muted">Enter each expense separately. The total expenses will be added to the Designer’s project list and Reports.</p>
+                    <p class="text-muted">Choose a project, add all its expense rows, then save them together. Materials is selected by default.</p>
                     <form method="post" action="{{ route('project-expenses.store') }}">
                         @csrf
                         <div class="form-row">
-                            <div class="form-group col-md-4">
+                            <div class="form-group col-md-6">
                                 <label>Project</label>
-                                <select name="project_id" class="form-control" required>
+                                <select id="expense-project" name="project_id" class="form-control" required>
                                     <option value="">Choose project</option>
                                     @foreach($projects as $project)
-                                        <option value="{{ $project->id }}">
-                                            {{ $project->project_name }}
-                                        </option>@endforeach
+                                        @php($spent = $project->expenses_sum_amount ?? 0)
+                                        @php($remaining = $project->budget - $spent)
+                                        <option value="{{ $project->id }}" data-remaining="{{ max(0, $remaining) }}">
+                                            {{ $project->project_name }} — Budget ৳{{ number_format($project->budget, 2) }}, spent ৳{{ number_format($spent, 2) }}, remaining ৳{{ number_format($remaining, 2) }}
+                                        </option>
+                                    @endforeach
                                 </select>
-                            </div>
-                            <div class="form-group col-md-2">
-                                <label>Category</label>
-                                <select name="category" class="form-control">
-                                    <option value="1">Materials</option>
-                                    <option value="2">Labor</option>
-                                    <option value="3">Overhead</option>
-                                    <option value="4">Other</option>
-                                </select>
-                            </div>
-                            <div class="form-group col-md-2">
-                                <label>Amount (৳)</label>
-                                <input name="amount" type="number" min="0.01" step="0.01" class="form-control" required>
-                            </div>
-                            <div class="form-group col-md-2">
-                                <label>Date</label>
-                                <input name="expense_date" type="date" value="{{ date('Y-m-d') }}" class="form-control" required>
-                            </div>
-                            <div class="form-group col-md-2">
-                                <label>Description</label>
-                                <input name="description" maxlength="255" class="form-control">
+                                <small id="expense-budget-hint" class="form-text text-muted">Select a project to see its remaining budget.</small>
                             </div>
                         </div>
-                        <button class="btn btn-outline-primary">Save expense</button>
+                        <div class="table-responsive">
+                            <table class="table table-bordered" id="expense-rows">
+                                <thead><tr><th>Category</th><th>Amount (৳)</th><th>Date</th><th>Description</th><th></th></tr></thead>
+                                <tbody>
+                                    <tr class="expense-row">
+                                        <td><select name="expenses[0][category]" class="form-control" required><option value="1" selected>Materials</option><option value="2">Labor</option><option value="3">Overhead</option><option value="4">Other</option></select></td>
+                                        <td><input name="expenses[0][amount]" type="number" min="0.01" step="0.01" class="form-control expense-amount" required></td>
+                                        <td><input name="expenses[0][expense_date]" type="date" value="{{ date('Y-m-d') }}" class="form-control" required></td>
+                                        <td><input name="expenses[0][description]" maxlength="255" class="form-control"></td>
+                                        <td><button type="button" class="btn btn-outline-danger remove-expense" disabled>Remove</button></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <button type="button" id="add-expense-row" class="btn btn-outline-secondary mr-2">Add row</button>
+                        <button class="btn btn-outline-primary">Save all expenses</button>
                     </form>
                 </div>
             </div>
@@ -442,6 +444,56 @@
                 }
                 document.getElementById('available_units').value = rows.map(row => row.querySelector('.flat-number').value.trim() + ' | ' + row.querySelector('.flat-price').value).join('\n');
             });
+        </script>
+    @endif
+    @if(!$showProjectsOnly && in_array($roleId, [1, 2, 4, 7], true))
+        <script>
+            const expenseProject = document.getElementById('expense-project');
+            const expenseBudgetHint = document.getElementById('expense-budget-hint');
+            const expenseRows = document.querySelector('#expense-rows tbody');
+            const expenseRowTemplate = expenseRows.querySelector('.expense-row').cloneNode(true);
+
+            function updateExpenseBudget() {
+                const selected = expenseProject.selectedOptions[0];
+                const remaining = Number(selected.dataset.remaining);
+                if (!selected.value) {
+                    expenseRows.querySelectorAll('.expense-amount').forEach(input => input.removeAttribute('max'));
+                    expenseBudgetHint.textContent = 'Select a project to see its remaining budget.';
+                    return;
+                }
+
+                expenseRows.querySelectorAll('.expense-amount').forEach(input => input.max = remaining.toFixed(2));
+                expenseBudgetHint.textContent = 'Remaining project budget: ৳' + remaining.toLocaleString('en-BD', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+            }
+
+            function updateExpenseRows() {
+                const rows = [...expenseRows.querySelectorAll('.expense-row')];
+                rows.forEach((row, index) => {
+                    row.querySelectorAll('[name]').forEach(input => input.name = input.name.replace(/expenses\[\d+\]/, `expenses[${index}]`));
+                    row.querySelector('.remove-expense').disabled = rows.length === 1;
+                });
+                updateExpenseBudget();
+            }
+
+            document.getElementById('add-expense-row').addEventListener('click', () => {
+                const row = expenseRowTemplate.cloneNode(true);
+                row.querySelectorAll('input').forEach(input => {
+                    if (input.type === 'date') input.value = '{{ date('Y-m-d') }}';
+                    else input.value = '';
+                });
+                row.querySelector('select').value = '1';
+                expenseRows.appendChild(row);
+                updateExpenseRows();
+            });
+
+            expenseRows.addEventListener('click', event => {
+                if (!event.target.classList.contains('remove-expense')) return;
+                event.target.closest('.expense-row').remove();
+                updateExpenseRows();
+            });
+
+            expenseProject.addEventListener('change', updateExpenseBudget);
+            updateExpenseRows();
         </script>
     @endif
 @endsection

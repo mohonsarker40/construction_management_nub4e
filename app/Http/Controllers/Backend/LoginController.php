@@ -9,70 +9,35 @@ use Illuminate\Support\Facades\Auth;
 
 class LoginController extends Controller
 {
-
     public function index()
     {
         return view('Backend/Auth/login');
     }
 
-
-
     public function doLogin(Request $request)
     {
         $credentials = User::validatedCredentials($request);
         $pendingClient = User::where('email', $credentials['email'])->where('role_id', 8)->where('status', 0)->exists();
-        if ($pendingClient) return back()->withInput($request->only('email'))->with('pendingApproval', 'আপনার ক্লায়েন্ট অ্যাকাউন্ট Admin-এর অনুমোদনের অপেক্ষায় আছে।');
+        if ($pendingClient) {
+            return back()->withInput($request->only('email'))->with('pendingApproval', 'আপনার ক্লায়েন্ট অ্যাকাউন্ট Admin-এর অনুমোদনের অপেক্ষায় আছে।');
+        }
 
         if (Auth::attempt($credentials + ['status' => 1])) {
             $request->session()->regenerate();
-            if ((int) auth()->user()->role_id === 8) return redirect()->route('booking.request.form');
+            if ((int) auth()->user()->role_id === 8) {
+                return redirect()->route('client.dashboard');
+            }
+
             return redirect()->route('dashboard');
         }
 
         return back()->with('failed', 'Invalid email or password');
     }
 
-
-
     public function logout()
     {
         Auth::logout();
+
         return redirect()->route('login');
-    }
-
-
-    public function create()
-    {
-        //
-    }
-
-
-    public function store(Request $request)
-    {
-        //
-    }
-
-
-    public function show($id)
-    {
-        //
-    }
-
-
-    public function edit($id)
-    {
-        //
-    }
-
-
-    public function update(Request $request, $id)
-    {
-        //
-    }
-
-
-    public function destroy($id)
-    {
-        //
     }
 }

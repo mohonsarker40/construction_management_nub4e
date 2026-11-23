@@ -20,7 +20,10 @@ Laravel 9 application using PHP 8, Blade, MySQL, session-based authentication, a
 ## Current routes and code areas
 
 - Public request and status pages: `FrontendController`, `resources/views/frontend/booking-request.blade.php`, and `resources/views/frontend/request-status.blade.php`.
-- Review queue, payment entry/approval, project expenses, and report: `BookingWorkflowController` and `resources/views/Backend/bookings/`.
+- Client accounts land on `/client/dashboard`, which shows only their own request statuses, confirmed flats, approved and pending payments, and remaining balances.
+- Backend controllers are grouped by feature under `app/Http/Controllers/Backend/`: bookings, clients, and RBAC. Shared authentication and dashboard controllers stay directly under `Backend/`.
+- Models are grouped under `app/Models/` by feature: `Booking/`, `Client/`, `Finance/`, `Project/`, and `RBAC/`. Migration files remain flat under `database/migrations/`, following Laravel's timestamped migration convention.
+- Review queue, payment entry/approval, project expenses, and report: `app/Http/Controllers/Backend/Booking/BookingWorkflowController.php` and `resources/views/Backend/bookings/`.
 - Authenticated web routes are in `routes/web.php`; role checks are handled by the workflow controller. The existing `password_hash` mapping remains in `User::getAuthPassword()`.
 - The sidebar links the existing role menus to booking requests, client bookings, and the separate financial report.
 

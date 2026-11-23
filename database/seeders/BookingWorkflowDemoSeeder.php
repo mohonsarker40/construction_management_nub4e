@@ -2,13 +2,13 @@
 
 namespace Database\Seeders;
 
-use App\Models\Booking;
-use App\Models\BookingRequest;
-use App\Models\Client;
-use App\Models\ClientPayment;
-use App\Models\Expense;
-use App\Models\Project;
-use App\Models\Role;
+use App\Models\Booking\Booking;
+use App\Models\Booking\BookingRequest;
+use App\Models\Booking\ClientPayment;
+use App\Models\Client\Client;
+use App\Models\Finance\Expense;
+use App\Models\Project\Project;
+use App\Models\RBAC\Role;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
@@ -69,7 +69,7 @@ class BookingWorkflowDemoSeeder extends Seeder
                 'start_date' => now()->subMonths(2)->toDateString(),
                 'estimated_end_date' => now()->addMonths(8)->toDateString(),
                 'actual_end_date' => now()->subDays(3)->toDateString(),
-                'available_units' => implode("\n", array_map(fn ($number) => 'A-' . $number . ' | ' . ([101 => 3000000, 102 => 4000000, 103 => 5000000, 104 => 4000000][$number] ?? 3000000), range(101, 120))),
+                'available_units' => implode("\n", array_map(fn ($number) => 'A-'.$number.' | '.([101 => 3000000, 102 => 4000000, 103 => 5000000, 104 => 4000000][$number] ?? 3000000), range(101, 120))),
                 'manager_user_id' => $users['manager']->id,
                 'designer_user_id' => $users['designer']->id,
                 'created_by' => $users['admin']->id,
@@ -90,7 +90,7 @@ class BookingWorkflowDemoSeeder extends Seeder
                     'agreed_amount' => $data['agreed_amount'],
                     'initial_payment_amount' => $data['initial_payment_amount'],
                     'payment_method' => 'bank',
-                    'payment_reference' => 'DEMO-' . $data['unit_label'],
+                    'payment_reference' => 'DEMO-'.$data['unit_label'],
                     'client_message' => 'Workflow demonstration request.',
                     'status' => $data['status'],
                 ], $data));
@@ -143,7 +143,7 @@ class BookingWorkflowDemoSeeder extends Seeder
             Designer: designer@gmail.com | 
             Accountant: accountant@gmail.com | 
             Client: client@gmail.com | 
-            Client2: client2@gmail.com' 
+            Client2: client2@gmail.com'
         );
     }
 }

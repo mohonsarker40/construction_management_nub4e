@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Models;
+namespace App\Models\Booking;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
@@ -8,9 +8,11 @@ use Illuminate\Http\Request;
 class ClientPayment extends Model
 {
     public const PENDING = 'pending';
+
     public const APPROVED = 'approved';
 
     protected $fillable = ['booking_id', 'amount', 'payment_date', 'payment_method', 'reference_no', 'status', 'recorded_by', 'approved_by', 'approved_at'];
+
     protected $casts = ['approved_at' => 'datetime'];
 
     public static function validatedData(Request $request): array
@@ -24,5 +26,8 @@ class ClientPayment extends Model
         ]);
     }
 
-    public function booking() { return $this->belongsTo(Booking::class); }
+    public function booking()
+    {
+        return $this->belongsTo(Booking::class);
+    }
 }
