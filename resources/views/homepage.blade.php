@@ -39,6 +39,18 @@
     .section-heading .eyebrow { justify-content:center; }
     .section-heading h2 { margin:0 0 13px; color:var(--green); font-size:clamp(2rem,4vw,3rem); line-height:1.1; letter-spacing:-.045em; }
     .section-heading p { margin:0; color:var(--muted); }
+    .project-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:18px; }
+    .project-card { padding:23px; border:1px solid var(--line); border-radius:12px; background:#fff; }
+    .project-card h3 { margin:0 0 8px; color:var(--green); }
+    .project-card p { margin:0 0 10px; color:var(--muted); }
+    .project-card .project-state { font-weight:700; color:var(--green); }
+    .project-card .project-state.pending { color:#856404; }
+    .project-card a { display:inline-block; margin-top:12px; color:var(--green); font-weight:750; }
+    .flat-list { display:grid; grid-template-columns:repeat(auto-fit,minmax(125px,1fr)); gap:9px; margin-top:14px; }
+    .flat-item { padding:11px; border:1px solid var(--line); border-radius:8px; background:#f8faf6; }
+    .flat-item strong,.flat-item span { display:block; }
+    .flat-item span { margin-top:4px; color:var(--muted); font-size:.88rem; }
+    .project-card .sold-out { color:var(--muted); font-size:.92rem; }
     .feature-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:18px; }
     .feature { padding:27px; border:1px solid var(--line); border-radius:12px; background:#fff; }
     .feature-icon { display:grid; width:44px; height:44px; margin-bottom:21px; place-items:center; border-radius:12px; color:var(--green); background:#eaf1dc; font-size:1.25rem; }
@@ -65,7 +77,8 @@
                 <h1>Build better.<br><em>Stay in control.</em></h1>
                 <p class="hero-copy">Bring project plans, people, and materials together. Keep every site moving with a clear view of what’s happening next.</p>
                 <div class="hero-actions">
-                    <a class="button button-primary" href="{{ route('login') }}">Open your workspace <span aria-hidden="true">↗</span></a>
+                    <a class="button button-primary" href="{{ auth()->check() && (int) auth()->user()->role_id === 8 ? route('booking.request.form') : route('client.register.form') }}">{{ auth()->check() && (int) auth()->user()->role_id === 8 ? 'Choose a flat' : 'Register to buy a flat' }} <span aria-hidden="true">↗</span></a>
+                    <a class="text-link" href="{{ route('login') }}">Team sign in</a>
                     <a class="text-link" href="#solutions">Explore the platform <span aria-hidden="true">↓</span></a>
                 </div>
                 <div class="hero-proof">
@@ -82,6 +95,28 @@
         </div>
     </section>
 
+    <section class="section" id="projects">
+        <div class="section-inner">
+            <div class="section-heading"><p class="eyebrow">আমাদের প্রজেক্ট</p><h2>প্রজেক্ট দেখুন</h2><p>সম্পন্ন প্রজেক্টে খালি ফ্ল্যাট থাকলে সেখান থেকে ফ্ল্যাট বেছে বুকিং অনুরোধ পাঠাতে পারবেন।</p></div>
+            <div class="project-grid">
+                @forelse($projects as $project)
+                    <article class="project-card">
+                        <h3>{{ $project->project_name }}</h3><p>{{ $project->location }} · {{ $project->project_type }}</p>
+                        @if(count($project->frontend_units))
+                            <p class="project-state">সম্পন্ন · {{ count($project->frontend_units) }}টি খালি ফ্ল্যাট</p>
+                            <div class="flat-list">@foreach($project->frontend_units as $unit)<div class="flat-item"><strong>ফ্ল্যাট {{ $unit['label'] }}</strong><span>৳ {{ number_format($unit['price'], 2) }}</span></div>@endforeach</div>
+                            <a href="{{ route('booking.request.form', ['project_id' => $project->id]) }}">এই প্রজেক্টের ফ্ল্যাট বাছুন →</a>
+                        @else
+                            <p class="project-state sold-out">সম্পন্ন · এখন খালি ফ্ল্যাট নেই</p>
+                        @endif
+                    </article>
+                @empty
+                    <p class="request-note">এখনো কোনো প্রজেক্ট যোগ করা হয়নি।</p>
+                @endforelse
+            </div>
+        </div>
+    </section>
+
     <section class="section" id="solutions">
         <div class="section-inner">
             <div class="section-heading">
@@ -91,8 +126,8 @@
             </div>
             <div class="feature-grid">
                 <article class="feature"><div class="feature-icon" aria-hidden="true">⌂</div><h3>Project visibility</h3><p>Keep project details, milestones, documents, and status updates easy to find.</p></article>
-                <article class="feature"><div class="feature-icon" aria-hidden="true">◷</div><h3>Team coordination</h3><p>Connect staff assignments and task ownership with the work happening on site.</p></article>
-                <article class="feature"><div class="feature-icon" aria-hidden="true">▦</div><h3>Materials in view</h3><p>Organize supplier orders and site inventory alongside each project.</p></article>
+                <article class="feature"><div class="feature-icon" aria-hidden="true">◷</div><h3>Team coordination</h3><p>Connect project user assignments and task ownership with the work happening on site.</p></article>
+                <article class="feature"><div class="feature-icon" aria-hidden="true">▦</div><h3>Materials in view</h3><p>Keep site inventory details alongside each project.</p></article>
             </div>
         </div>
     </section>
@@ -106,7 +141,7 @@
             </div>
             <div class="steps">
                 <article class="step"><span class="step-number">01 / PLAN</span><h3>Set up the project</h3><p>Bring the client, scope, schedule, and budget into one project record.</p></article>
-                <article class="step"><span class="step-number">02 / ORGANIZE</span><h3>Align people and supplies</h3><p>Coordinate team assignments, task ownership, suppliers, and materials.</p></article>
+                <article class="step"><span class="step-number">02 / ORGANIZE</span><h3>Align project work</h3><p>Coordinate user assignments and task ownership for each project.</p></article>
                 <article class="step"><span class="step-number">03 / DELIVER</span><h3>Track progress together</h3><p>Follow milestones and updates as work moves from plan to handover.</p></article>
             </div>
         </div>

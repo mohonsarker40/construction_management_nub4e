@@ -7,10 +7,19 @@
             <h1 class="h3 mb-1 text-gray-800">Clients</h1>
             <p class="mb-0 text-muted">Manage client accounts and their information.</p>
         </div>
-        <a href="{{ route('admin.clients.create') }}" class="btn btn-primary btn-sm shadow-sm"><i class="fas fa-plus fa-sm mr-1"></i> Add client</a>
+        <span class="text-muted small">Clients join through the website; Admin approves their registration below.</span>
     </div>
 
     @include('Backend.partials.flash')
+
+    <div class="card shadow mb-4">
+        <div class="card-header py-3"><h6 class="m-0 font-weight-bold text-warning">Pending client registrations</h6></div>
+        <div class="card-body table-responsive">
+            <table class="table table-bordered"><thead><tr><th>Name</th><th>Email</th><th>Phone</th><th>Registered</th><th>Action</th></tr></thead><tbody>
+            @forelse($pendingRegistrations as $pending)<tr><td>{{ $pending->full_name }}</td><td>{{ $pending->email }}</td><td>{{ $pending->phone ?: '—' }}</td><td>{{ $pending->created_at?->format('d M Y') ?? '—' }}</td><td><form method="post" action="{{ route('admin.clients.registrations.approve', $pending) }}">@csrf @method('PATCH')<button class="btn btn-sm btn-success">Approve and activate</button></form></td></tr>@empty<tr><td colspan="5" class="text-center text-muted">কোনো pending নিবন্ধন নেই।</td></tr>@endforelse
+            </tbody></table>
+        </div>
+    </div>
 
     <div class="card shadow mb-4">
         <div class="card-header py-3"><h6 class="m-0 font-weight-bold text-primary">Client list</h6></div>
