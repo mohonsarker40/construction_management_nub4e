@@ -27,13 +27,13 @@ class Client extends Model
         return $this->belongsTo(User::class);
     }
 
-    public function bookingRequests()
-    {
-        return $this->hasMany(BookingRequest::class);
-    }
-
     public function bookings()
     {
         return $this->hasMany(Booking::class);
+    }
+
+    public function bookingRequests()
+    {
+        return $this->hasMany(BookingRequest::class);
     }
 }

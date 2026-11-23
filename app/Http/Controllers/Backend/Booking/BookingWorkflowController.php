@@ -58,10 +58,11 @@ class BookingWorkflowController extends Controller
         $designers = $roleId === 1 ? User::where('role_id', 4)->where('status', 1)->orderBy('full_name')->get() : collect();
 
         $requests = BookingRequest::with(['project', 'client', 'booking'])
+            ->whereHas('project', fn ($query) => $query->where('budget', '>', 0)->whereHas('expenses'))
             ->when($projectIds !== null, fn ($query) => $query->whereIn('project_id', $projectIds))
             ->orderByDesc('created_at')->get();
 
-        $bookingsQuery = Booking::with(['project', 'client', 'payments']);
+        $bookingsQuery = Booking::with(['project', 'client', 'payments'])->where('status', Booking::BOOKED);
         if ($projectIds !== null) {
             $bookingsQuery->whereIn('project_id', $projectIds);
         }
@@ -80,43 +81,27 @@ class BookingWorkflowController extends Controller
     {
         $this->allow([1]);
         $data = Project::validatedData($request);
-        $unitTotalCents = $this->validateUnitLines($data['available_units']);
+        $unitTotalCents = collect($data['flats'])->sum(fn ($flat) => (int) round((float) $flat['price'] * 100));
         if ($unitTotalCents > (int) round((float) $data['budget'] * 100)) {
-            throw ValidationException::withMessages(['available_units' => 'সব flat-এর মোট দাম project budget-এর বেশি হতে পারবে না।']);
+            throw ValidationException::withMessages(['flats' => 'সব flat-এর মোট দাম project budget-এর বেশি হতে পারবে না।']);
+        }
+        $flatNames = collect($data['flats'])->pluck('flat_name')->map(fn ($name) => mb_strtolower(trim($name)));
+        if ($flatNames->unique()->count() !== $flatNames->count()) {
+            throw ValidationException::withMessages(['flats' => 'একই ফ্ল্যাট নম্বর একাধিকবার দেওয়া যাবে না।']);
         }
         if (! empty($data['manager_user_id'])) {
             abort_unless(User::whereKey($data['manager_user_id'])->where('role_id', 2)->exists(), 422, 'নির্বাচিত অ্যাকাউন্টটি Project Manager হতে হবে।');
         }
         abort_unless(User::whereKey($data['designer_user_id'])->where('role_id', 4)->where('status', 1)->exists(), 422, 'নির্বাচিত অ্যাকাউন্টটি সক্রিয় Designer/Architect হতে হবে।');
         $data['created_by'] = auth()->id();
-        Project::create($data);
+        DB::transaction(function () use ($data) {
+            $flats = $data['flats'];
+            unset($data['flats']);
+            $project = Project::create($data);
+            $project->flats()->createMany($flats);
+        });
 
         return back()->with('success', 'Project saved. Clients can now send a request from the website.');
-    }
-
-    private function validateUnitLines(string $lines): int
-    {
-        $labels = [];
-        $totalCents = 0;
-        foreach (preg_split('/\\r\\n|\\r|\\n/', $lines) as $line) {
-            if (trim($line) === '') {
-                continue;
-            }
-            $parts = array_map('trim', explode('|', $line, 2));
-            if (count($parts) !== 2 || $parts[0] === '' || strlen($parts[0]) > 50 || ! is_numeric($parts[1]) || (float) $parts[1] <= 0) {
-                throw ValidationException::withMessages(['available_units' => 'প্রতিটি ফ্ল্যাটের নম্বর ও সঠিক দাম দিতে হবে।']);
-            }
-            if (in_array(strtolower($parts[0]), $labels, true)) {
-                throw ValidationException::withMessages(['available_units' => 'একই ফ্ল্যাট নম্বর একাধিকবার দেওয়া যাবে না।']);
-            }
-            $labels[] = strtolower($parts[0]);
-            $totalCents += (int) round((float) $parts[1] * 100);
-        }
-        if (empty($labels)) {
-            throw ValidationException::withMessages(['available_units' => 'কমপক্ষে একটি ফ্ল্যাট যোগ করুন।']);
-        }
-
-        return $totalCents;
     }
 
     public function completeProject(Request $request, Project $project)
@@ -124,6 +109,7 @@ class BookingWorkflowController extends Controller
         $roleId = $this->allow([2, 4]);
         $assignedUserId = $roleId === 2 ? $project->manager_user_id : $project->designer_user_id;
         abort_unless((int) $assignedUserId === (int) auth()->id(), 403);
+        abort_unless(! $project->actual_end_date, 422, 'Project completion date is already set.');
         $data = $request->validate(['actual_end_date' => ['required', 'date', 'before_or_equal:today']]);
         $project->update(['actual_end_date' => $data['actual_end_date']]);
 
@@ -160,6 +146,7 @@ class BookingWorkflowController extends Controller
             'rejection_note' => ['nullable', 'string', 'max:255'],
         ]);
         abort_unless($bookingRequest->status === BookingRequest::PENDING_MANAGER, 422, 'This request has already been reviewed by the Project Manager.');
+        abort_unless((float) $bookingRequest->project->budget > 0 && $bookingRequest->project->expenses()->exists(), 422, 'Manager review requires a project budget and at least one recorded expense.');
         if ($roleId === 2) {
             abort_unless((int) $bookingRequest->project->manager_user_id === (int) auth()->id(), 403);
         }
@@ -197,6 +184,7 @@ class BookingWorkflowController extends Controller
                 return;
             }
 
+            abort_unless((int) round((float) $lockedRequest->initial_payment_amount * 100) === (int) round((float) $lockedRequest->agreed_amount * 100), 422, 'Only full flat-price payment can be approved.');
             $booking = Booking::create([
                 'booking_request_id' => $lockedRequest->id,
                 'project_id' => $lockedRequest->project_id,
@@ -226,31 +214,19 @@ class BookingWorkflowController extends Controller
                 'accountant_reviewed_at' => now(),
                 'rejection_note' => null,
             ]);
+
         });
 
         return back()->with('success', $data['decision'] === 'approve' ? 'Payment verified and booking confirmed.' : 'Request rejected.');
-    }
-
-    public function storePayment(Request $request)
-    {
-        $this->allow([7]);
-        $data = ClientPayment::validatedData($request);
-        $booking = Booking::findOrFail($data['booking_id']);
-        $receivedAndPending = ClientPayment::where('booking_id', $booking->id)->whereIn('status', [ClientPayment::PENDING, ClientPayment::APPROVED])->sum('amount');
-        if ($receivedAndPending + $data['amount'] > $booking->agreed_amount) {
-            return back()->withErrors(['amount' => 'Payment is greater than the remaining booking balance.'])->withInput();
-        }
-        $data['status'] = ClientPayment::PENDING;
-        $data['recorded_by'] = auth()->id();
-        ClientPayment::create($data);
-
-        return back()->with('success', 'Payment recorded and sent for approval.');
     }
 
     public function approvePayment(ClientPayment $payment)
     {
         $this->allow([7]);
         abort_unless($payment->status === ClientPayment::PENDING, 422, 'Only a pending payment can be approved.');
+        $booking = $payment->booking;
+        $approved = (float) ClientPayment::where('booking_id', $booking->id)->where('status', ClientPayment::APPROVED)->sum('amount');
+        abort_unless($approved === 0.0 && (int) round((float) $payment->amount * 100) === (int) round((float) $booking->agreed_amount * 100), 422, 'Only one full flat-price payment can be approved.');
         $payment->update(['status' => ClientPayment::APPROVED, 'approved_by' => auth()->id(), 'approved_at' => now()]);
 
         return back()->with('success', 'Payment approved and included in reports.');
@@ -308,7 +284,7 @@ class BookingWorkflowController extends Controller
             $user = auth()->user();
             $client = Client::where('user_id', $user->id)->where('status', 1)->firstOrFail();
             $bookings = Booking::with(['project', 'payments' => fn ($q) => $q->where('status', ClientPayment::APPROVED)])
-                ->where('client_id', $client->id)->orderByDesc('booking_date')->get();
+                ->where('client_id', $client->id)->where('status', Booking::BOOKED)->orderByDesc('booking_date')->get();
 
             return view('Backend.bookings.client', compact('bookings'));
         }
@@ -321,7 +297,7 @@ class BookingWorkflowController extends Controller
                 ->whereHas('booking', fn ($q) => $q->where('project_id', $project->id))->sum('amount');
         }
         $bookings = Booking::with(['project', 'client', 'payments' => fn ($q) => $q->where('status', ClientPayment::APPROVED)])
-            ->whereIn('project_id', $projectIds)->orderByDesc('booking_date')->get();
+            ->whereIn('project_id', $projectIds)->where('status', Booking::BOOKED)->orderByDesc('booking_date')->get();
         $payments = ClientPayment::with('booking.project', 'booking.client')->where('status', ClientPayment::APPROVED)
             ->whereHas('booking', fn ($q) => $q->whereIn('project_id', $projectIds))->orderByDesc('payment_date')->get();
         $revenueTotal = $payments->sum('amount');

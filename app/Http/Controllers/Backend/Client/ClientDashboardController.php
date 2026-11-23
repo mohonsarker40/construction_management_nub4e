@@ -20,6 +20,7 @@ class ClientDashboardController extends Controller
             ->get();
         $bookings = Booking::with(['project', 'payments' => fn ($query) => $query->orderBy('payment_date')->orderBy('id')])
             ->where('client_id', $client->id)
+            ->where('status', Booking::BOOKED)
             ->orderByDesc('booking_date')
             ->get();
 

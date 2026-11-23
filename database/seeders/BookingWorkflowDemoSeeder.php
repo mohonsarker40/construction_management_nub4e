@@ -69,64 +69,47 @@ class BookingWorkflowDemoSeeder extends Seeder
                 'start_date' => now()->subMonths(2)->toDateString(),
                 'estimated_end_date' => now()->addMonths(8)->toDateString(),
                 'actual_end_date' => now()->subDays(3)->toDateString(),
-                'available_units' => implode("\n", array_map(fn ($number) => 'A-'.$number.' | '.([101 => 3000000, 102 => 4000000, 103 => 5000000, 104 => 4000000][$number] ?? 3000000), range(101, 120))),
                 'manager_user_id' => $users['manager']->id,
                 'designer_user_id' => $users['designer']->id,
                 'created_by' => $users['admin']->id,
             ]);
 
+            foreach ([101 => 3000000, 102 => 4000000, 103 => 5000000, 104 => 4000000] as $number => $price) {
+                $project->flats()->updateOrCreate(['flat_name' => 'A-'.$number], ['price' => $price]);
+            }
+
             $requestData = [
-                ['request_no' => 'BR-PM-101', 'unit_label' => 'A-101', 'agreed_amount' => 3000000, 'initial_payment_amount' => 500000, 'status' => BookingRequest::PENDING_MANAGER],
-                ['request_no' => 'BR-ACC-102', 'unit_label' => 'A-102', 'agreed_amount' => 4000000, 'initial_payment_amount' => 1000000, 'status' => BookingRequest::PENDING_ACCOUNTANT, 'manager_reviewed_by' => $users['manager']->id, 'manager_reviewed_at' => now()->subHours(2)],
-                ['request_no' => 'BR-PART-103', 'unit_label' => 'A-103', 'agreed_amount' => 5000000, 'initial_payment_amount' => 1000000, 'status' => BookingRequest::APPROVED, 'manager_reviewed_by' => $users['manager']->id, 'manager_reviewed_at' => now()->subDays(5), 'accountant_reviewed_by' => $users['accountant']->id, 'accountant_reviewed_at' => now()->subDays(4)],
-                ['request_no' => 'BR-FULL-104', 'unit_label' => 'A-104', 'agreed_amount' => 4000000, 'initial_payment_amount' => 4000000, 'status' => BookingRequest::APPROVED, 'manager_reviewed_by' => $users['manager']->id, 'manager_reviewed_at' => now()->subDays(4), 'accountant_reviewed_by' => $users['accountant']->id, 'accountant_reviewed_at' => now()->subDays(3)],
+                ['request_no' => 'BR-PM-101', 'flat' => 'A-101', 'amount' => 3000000, 'status' => BookingRequest::PENDING_MANAGER],
+                ['request_no' => 'BR-ACC-102', 'flat' => 'A-102', 'amount' => 4000000, 'status' => BookingRequest::PENDING_ACCOUNTANT, 'manager_reviewed_by' => $users['manager']->id, 'manager_reviewed_at' => now()->subHours(2)],
+                ['request_no' => 'BR-FULL-104', 'flat' => 'A-104', 'amount' => 4000000, 'status' => BookingRequest::APPROVED, 'manager_reviewed_by' => $users['manager']->id, 'manager_reviewed_at' => now()->subDays(4), 'accountant_reviewed_by' => $users['accountant']->id, 'accountant_reviewed_at' => now()->subDays(3)],
             ];
 
             foreach ($requestData as $data) {
-                $request = BookingRequest::updateOrCreate(['request_no' => $data['request_no']], array_merge([
-                    'project_id' => $project->id,
-                    'client_id' => $client->id,
-                    'unit_label' => $data['unit_label'],
-                    'agreed_amount' => $data['agreed_amount'],
-                    'initial_payment_amount' => $data['initial_payment_amount'],
-                    'payment_method' => 'bank',
-                    'payment_reference' => 'DEMO-'.$data['unit_label'],
-                    'client_message' => 'Workflow demonstration request.',
-                    'status' => $data['status'],
-                ], $data));
-
-                if ($request->status === BookingRequest::APPROVED) {
+                $flat = $project->flats()->where('flat_name', $data['flat'])->firstOrFail();
+                $request = BookingRequest::updateOrCreate(['request_no' => $data['request_no']], [
+                    'project_id' => $project->id, 'client_id' => $client->id,
+                    'unit_label' => $flat->flat_name, 'agreed_amount' => $data['amount'],
+                    'initial_payment_amount' => $data['amount'], 'payment_method' => 'bank',
+                    'payment_reference' => 'DEMO-'.$data['flat'], 'client_message' => 'Workflow demonstration request.',
+                    'status' => $data['status'], 'manager_reviewed_by' => $data['manager_reviewed_by'] ?? null,
+                    'manager_reviewed_at' => $data['manager_reviewed_at'] ?? null,
+                    'accountant_reviewed_by' => $data['accountant_reviewed_by'] ?? null,
+                    'accountant_reviewed_at' => $data['accountant_reviewed_at'] ?? null,
+                ]);
+                if ($data['status'] === BookingRequest::APPROVED) {
                     $booking = Booking::updateOrCreate(['booking_request_id' => $request->id], [
-                        'project_id' => $project->id,
-                        'client_id' => $client->id,
-                        'unit_label' => $request->unit_label,
-                        'agreed_amount' => $request->agreed_amount,
-                        'booking_date' => now()->subDays(3)->toDateString(),
-                        'status' => Booking::BOOKED,
+                        'project_id' => $project->id, 'client_id' => $client->id,
+                        'unit_label' => $flat->flat_name, 'agreed_amount' => $data['amount'],
+                        'booking_date' => now()->subDays(3)->toDateString(), 'status' => Booking::BOOKED,
                         'created_by' => $users['accountant']->id,
                     ]);
-                    ClientPayment::updateOrCreate(['booking_id' => $booking->id, 'reference_no' => $request->payment_reference], [
-                        'amount' => $request->initial_payment_amount,
-                        'payment_date' => now()->subDays(3)->toDateString(),
-                        'payment_method' => $request->payment_method,
-                        'status' => ClientPayment::APPROVED,
-                        'recorded_by' => $users['accountant']->id,
-                        'approved_by' => $users['accountant']->id,
-                        'approved_at' => now()->subDays(3),
+                    ClientPayment::updateOrCreate(['booking_id' => $booking->id, 'reference_no' => 'DEMO-'.$data['flat']], [
+                        'amount' => $booking->agreed_amount, 'payment_date' => now()->subDays(3)->toDateString(),
+                        'payment_method' => 'bank', 'status' => ClientPayment::APPROVED,
+                        'recorded_by' => $users['accountant']->id, 'approved_by' => $users['accountant']->id, 'approved_at' => now()->subDays(3),
                     ]);
                 }
             }
-
-            $partialBooking = Booking::where('project_id', $project->id)->where('unit_label', 'A-103')->firstOrFail();
-            ClientPayment::updateOrCreate(['booking_id' => $partialBooking->id, 'reference_no' => 'DEMO-PART-103-SECOND'], [
-                'amount' => 500000,
-                'payment_date' => now()->subDay()->toDateString(),
-                'payment_method' => 'mobile_banking',
-                'status' => ClientPayment::PENDING,
-                'recorded_by' => $users['accountant']->id,
-                'approved_by' => null,
-                'approved_at' => null,
-            ]);
 
             Expense::updateOrCreate(['project_id' => $project->id, 'description' => 'Demo materials'], [
                 'category' => Expense::MATERIALS, 'amount' => 1200000, 'expense_date' => now()->subDays(10)->toDateString(), 'recorded_by' => $users['manager']->id,

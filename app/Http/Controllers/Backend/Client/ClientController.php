@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Backend\Client;
 
 use App\Http\Controllers\Controller;
+use App\Models\Booking\BookingRequest;
 use App\Models\Client\Client;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -52,7 +53,7 @@ class ClientController extends Controller
 
     public function destroy(Client $client)
     {
-        if ($client->bookingRequests()->exists() || $client->bookings()->exists()) {
+        if ($client->bookings()->exists() || $client->bookingRequests()->exists()) {
             return redirect()->route('admin.clients.index')->with('error', 'This client has booking records and cannot be deleted.');
         }
 

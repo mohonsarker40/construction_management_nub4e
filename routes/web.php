@@ -44,7 +44,6 @@ Route::prefix('admin')->middleware('authCheck')->group(function () {
     Route::patch('/projects/{project}/designer', [BookingWorkflowController::class, 'assignDesigner'])->name('projects.designer');
     Route::patch('/booking-requests/{bookingRequest}/manager-review', [BookingWorkflowController::class, 'reviewByManager'])->name('booking-requests.manager-review');
     Route::patch('/booking-requests/{bookingRequest}/accountant-review', [BookingWorkflowController::class, 'reviewByAccountant'])->name('booking-requests.accountant-review');
-    Route::post('/booking-payments', [BookingWorkflowController::class, 'storePayment'])->name('booking-payments.store');
     Route::patch('/booking-payments/{payment}/approve', [BookingWorkflowController::class, 'approvePayment'])->name('booking-payments.approve');
     Route::post('/project-expenses', [BookingWorkflowController::class, 'storeExpense'])->name('project-expenses.store');
     Route::get('/reports/finance', [BookingWorkflowController::class, 'report'])->name('reports.finance');

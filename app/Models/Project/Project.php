@@ -12,7 +12,7 @@ use Illuminate\Http\Request;
 
 class Project extends Model
 {
-    protected $fillable = ['client_id', 'project_name', 'project_type', 'location', 'budget', 'start_date', 'estimated_end_date', 'actual_end_date', 'available_units', 'status', 'manager_user_id', 'designer_user_id', 'created_by'];
+    protected $fillable = ['client_id', 'project_name', 'project_type', 'location', 'budget', 'start_date', 'estimated_end_date', 'actual_end_date', 'status', 'manager_user_id', 'designer_user_id', 'created_by'];
 
     protected $casts = ['start_date' => 'date', 'estimated_end_date' => 'date', 'actual_end_date' => 'date'];
 
@@ -28,21 +28,18 @@ class Project extends Model
             'estimated_end_date' => ['required', 'date', 'after_or_equal:start_date'],
             'manager_user_id' => ['nullable', 'exists:users,id'],
             'designer_user_id' => ['required', 'exists:users,id'],
-            'available_units' => ['required', 'string', 'max:20000'],
+            'flats' => ['required', 'array', 'min:1'],
+            'flats.*.flat_name' => ['required', 'string', 'max:50'],
+            'flats.*.price' => ['required', 'numeric', 'gt:0', 'max:9999999999.99'],
         ]);
     }
 
     public function listedUnits(): array
     {
-        return collect(preg_split('/\\r\\n|\\r|\\n/', $this->available_units ?? ''))
+        return $this->flats()->orderBy('flat_name')->get()
             ->map(function ($line) {
-                $parts = array_map('trim', explode('|', $line, 2));
-                if (count($parts) !== 2 || $parts[0] === '' || ! is_numeric($parts[1]) || (float) $parts[1] <= 0) {
-                    return null;
-                }
-
-                return ['label' => $parts[0], 'price' => (float) $parts[1]];
-            })->filter()->values()->all();
+                return ['id' => $line->id, 'label' => $line->flat_name, 'price' => (float) $line->price];
+            })->all();
     }
 
     public function client()
@@ -60,14 +57,19 @@ class Project extends Model
         return $this->belongsTo(User::class, 'designer_user_id');
     }
 
-    public function bookingRequests()
+    public function flats()
     {
-        return $this->hasMany(BookingRequest::class);
+        return $this->hasMany(Flat::class);
     }
 
     public function bookings()
     {
         return $this->hasMany(Booking::class);
+    }
+
+    public function bookingRequests()
+    {
+        return $this->hasMany(BookingRequest::class);
     }
 
     public function expenses()

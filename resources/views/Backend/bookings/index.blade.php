@@ -64,10 +64,10 @@
                                 <div id="flat-rows">
                                     <div class="form-row flat-row mb-2">
                                         <div class="col-md-5">
-                                            <input type="text" class="form-control flat-number" maxlength="50" placeholder="Flat number, e.g. A-101" required>
+                                            <input type="text" name="flats[0][flat_name]" class="form-control flat-number" maxlength="50" placeholder="Flat number, e.g. A-101" required>
                                         </div>
                                         <div class="col-md-5">
-                                            <input type="number" class="form-control flat-price" min="0.01" step="0.01" placeholder="Price (৳)" required>
+                                            <input type="number" name="flats[0][price]" class="form-control flat-price" min="0.01" step="0.01" placeholder="Price (৳)" required>
                                         </div>
                                         <div class="col-md-2">
                                             <button type="button" class="btn btn-outline-danger remove-flat">Remove</button>
@@ -77,7 +77,6 @@
                                 <button type="button" id="add-flat" class="btn btn-sm btn-outline-primary">
                                     + Add Another Flat
                                 </button>
-                                <input type="hidden" id="available_units" name="available_units">
                                     <p class="mb-0 mt-2">
                                         Total Price of Flats:
                                         <strong id="flat-total">
@@ -166,13 +165,13 @@
                                     <td>৳ {{ number_format($project->expenses_sum_amount ?? 0, 2) }}</td>
                                     <td>৳ {{ number_format($project->budget - ($project->expenses_sum_amount ?? 0), 2) }}</td>
                                     <td>
-                                        <form method="post" action="{{ route('projects.completion', $project) }}" class="form-inline">
-                                            @csrf @method('PATCH')
-                                            <input name="actual_end_date" type="date" value="{{ $project->actual_end_date?->format('Y-m-d') }}" max="{{ date('Y-m-d') }}" class="form-control form-control-sm mr-2" required>
-                                            <button class="btn btn-sm btn-success">Mark finished</button>
-                                        </form>
-
-                                        @if($project->actual_end_date)
+                                        @if(!$project->actual_end_date)
+                                            <form method="post" action="{{ route('projects.completion', $project) }}" class="form-inline">
+                                                @csrf @method('PATCH')
+                                                <input name="actual_end_date" type="date" max="{{ date('Y-m-d') }}" class="form-control form-control-sm mr-2" required>
+                                                <button class="btn btn-sm btn-success">Mark finished</button>
+                                            </form>
+                                        @else
                                             <small class="text-success">Finished {{ $project->actual_end_date->format('d M Y') }} · visible for flat purchase</small>
                                         @endif
                                     </td>
@@ -223,7 +222,7 @@
                                 <td>৳ {{ number_format($bookingRequest->agreed_amount, 2) }}</td>
                                 <td>
                                     ৳ {{ number_format($bookingRequest->initial_payment_amount, 2) }}<br>
-                                    <small>{{ $bookingRequest->initial_payment_amount >= $bookingRequest->agreed_amount ? 'Full payment' : 'Part payment' }}</small></td><td>{{ str_replace('_', ' ', ucfirst($bookingRequest->payment_method)) }}<br>
+                                    <small>Full payment required</small></td><td>{{ str_replace('_', ' ', ucfirst($bookingRequest->payment_method)) }}<br>
                                     <small>{{ $bookingRequest->payment_reference ?: 'No reference supplied' }}</small>
                                 </td>
                                 <td>
@@ -272,43 +271,6 @@
             </div>
         @endif
 
-        @if(!$showProjectsOnly && $roleId === 7)
-            <div class="card shadow mb-4">
-                <div class="card-header py-3">
-                    <h6 class="m-0 font-weight-bold text-primary">Record another client payment</h6>
-                </div>
-                <div class="card-body">
-                    <form method="post" action="{{ route('booking-payments.store') }}">
-                        @csrf
-                        <div class="form-row">
-                            <div class="form-group col-md-4">
-                                <label>Booking</label>
-                                <select name="booking_id" class="form-control" required><option value="">Choose booking</option>@foreach($bookings as $booking)@php($reservedPaid = $booking->payments->whereIn('status', [\App\Models\Booking\ClientPayment::APPROVED, \App\Models\Booking\ClientPayment::PENDING])->sum('amount'))<option value="{{ $booking->id }}">{{ $booking->client->client_name }} — {{ $booking->project->project_name }} / {{ $booking->unit_label }} (Balance ৳{{ number_format($booking->agreed_amount - $reservedPaid, 2) }})</option>@endforeach</select></div>
-                            <div class="form-group col-md-2">
-                                <label>Amount (৳)</label>
-                                <input name="amount" type="number" min="0.01" step="0.01" class="form-control" required></div>
-                            <div class="form-group col-md-2">
-                                <label>Date</label>
-                                <input name="payment_date" type="date" value="{{ date('Y-m-d') }}" class="form-control" required></div>
-                            <div class="form-group col-md-2">
-                                <label>Method</label>
-                                <select name="payment_method" class="form-control">
-                                    <option value="cash">Cash</option>
-                                    <option value="bank">Bank</option>
-                                    <option value="mobile_banking">Mobile banking</option>
-                                    <option value="cheque">Cheque</option>
-                                </select>
-                            </div>
-                            <div class="form-group col-md-2">
-                                <label>Reference</label>
-                                <input name="reference_no" maxlength="100" class="form-control">
-                            </div>
-                        </div>
-                        <button class="btn btn-primary">Save pending payment</button>
-                    </form>
-                </div>
-            </div>
-        @endif
 
         @if($roleId === 7)
             <div class="card shadow mb-4">
@@ -419,7 +381,8 @@
             }
 
             document.getElementById('add-flat').addEventListener('click', () => {
-                flatRows.insertAdjacentHTML('beforeend', '<div class="form-row flat-row mb-2"><div class="col-md-5"><input type="text" class="form-control flat-number" maxlength="50" placeholder="Flat number, e.g. A-101" required></div><div class="col-md-5"><input type="number" class="form-control flat-price" min="0.01" step="0.01" placeholder="Price (৳)" required></div><div class="col-md-2"><button type="button" class="btn btn-outline-danger remove-flat">Remove</button></div></div>');
+                const index = flatRows.querySelectorAll('.flat-row').length;
+                flatRows.insertAdjacentHTML('beforeend', `<div class="form-row flat-row mb-2"><div class="col-md-5"><input name="flats[${index}][flat_name]" type="text" class="form-control flat-number" maxlength="50" placeholder="Flat number, e.g. A-101" required></div><div class="col-md-5"><input name="flats[${index}][price]" type="number" class="form-control flat-price" min="0.01" step="0.01" placeholder="Price (৳)" required></div><div class="col-md-2"><button type="button" class="btn btn-outline-danger remove-flat">Remove</button></div></div>`);
             });
 
             flatRows.addEventListener('input', updateFlatTotal);
@@ -442,7 +405,7 @@
                     budgetMessage.classList.add('text-danger');
                     return;
                 }
-                document.getElementById('available_units').value = rows.map(row => row.querySelector('.flat-number').value.trim() + ' | ' + row.querySelector('.flat-price').value).join('\n');
+                rows.forEach((row, index) => { row.querySelector('.flat-number').name = `flats[${index}][flat_name]`; row.querySelector('.flat-price').name = `flats[${index}][price]`; });
             });
         </script>
     @endif

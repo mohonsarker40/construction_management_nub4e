@@ -56,11 +56,11 @@
         <div class="request-grid">
             <div class="wide selected-flat">ক্রেতা: {{ $client->client_name }} · {{ $client->email }} · {{ $client->phone }}</div>
             <div><label for="agreed_amount">ফ্ল্যাটের মোট দাম (৳)</label><input id="agreed_amount" name="agreed_amount" type="number" min="0.01" step="0.01" value="{{ old('agreed_amount') }}" readonly required></div>
-            <div><label for="initial_payment_amount">প্রাথমিক/ডাউন পেমেন্ট (৳)</label><input id="initial_payment_amount" name="initial_payment_amount" type="number" min="0.01" step="0.01" value="{{ old('initial_payment_amount') }}" required></div>
+            <div><label for="initial_payment_amount">অনুমোদনের জন্য পূর্ণ মূল্য (৳)</label><input id="initial_payment_amount" name="initial_payment_amount" type="number" min="0.01" step="0.01" value="{{ old('initial_payment_amount') }}" readonly required></div>
             <div><label for="payment_method">পেমেন্টের মাধ্যম</label><select id="payment_method" name="payment_method" required><option value="bank">ব্যাংক</option><option value="mobile_banking">মোবাইল ব্যাংকিং</option><option value="cheque">চেক</option><option value="cash">নগদ</option></select></div>
             <div><label for="payment_reference">লেনদেন/চেক নম্বর (ঐচ্ছিক)</label><input id="payment_reference" name="payment_reference" value="{{ old('payment_reference') }}" maxlength="100"></div>
             <div class="wide"><label for="client_message">অতিরিক্ত তথ্য (ঐচ্ছিক)</label><textarea id="client_message" name="client_message" rows="3" maxlength="2000">{{ old('client_message') }}</textarea></div>
-            <div class="wide"><p class="request-note">প্রাথমিক পেমেন্ট ফ্ল্যাটের দামের সমান হলে পূর্ণ পেমেন্ট, কম হলে আংশিক পেমেন্ট। প্রজেক্ট ম্যানেজার ও অ্যাকাউন্ট্যান্ট অনুমোদনের পর বুকিং নিশ্চিত হবে।</p><button class="button button-primary" type="submit">বুকিং অনুরোধ পাঠান</button></div>
+            <div class="wide"><p class="request-note">ফ্ল্যাট বুকিং অনুমোদনের জন্য পুরো মূল্য একবারে জমা দিতে হবে। ম্যানেজার এবং হিসাবরক্ষকের অনুমোদনের পর বুকিং নিশ্চিত হবে।</p><button class="button button-primary" type="submit">বুকিং অনুরোধ পাঠান</button></div>
         </div>
     </form>
     @endif
@@ -72,6 +72,7 @@
     const projectSelect = document.getElementById('project_id');
     const unitGroups = document.querySelectorAll('.unit-group');
     const priceField = document.getElementById('agreed_amount');
+    const paymentField = document.getElementById('initial_payment_amount');
     const selectedFlat = document.getElementById('selected-flat');
     function updateProject() {
         const chosenProject = projectSelect.value;
@@ -92,6 +93,7 @@
     function updateUnit() {
         const chosen = document.querySelector('input[name="unit_label"]:checked:not(:disabled)');
         priceField.value = chosen ? chosen.dataset.price : '';
+        paymentField.value = chosen ? chosen.dataset.price : '';
         selectedFlat.textContent = chosen ? `আপনি বেছেছেন: ফ্ল্যাট ${chosen.value} — ৳ ${Number(chosen.dataset.price).toLocaleString('en-BD')}` : 'এই প্রজেক্ট থেকে একটি ফ্ল্যাট বাছুন।';
     }
     projectSelect.addEventListener('change', updateProject);

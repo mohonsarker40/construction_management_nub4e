@@ -34,7 +34,6 @@ CREATE TABLE `projects`(
     `start_date` DATE NOT NULL,
     `estimated_end_date` DATE NULL,
     `actual_end_date` DATE NULL,
-    `available_units` TEXT NULL COMMENT 'One flat per line in label | price format',
     `status` TINYINT NOT NULL,
     `manager_user_id` INT NULL,
     `designer_user_id` INT NULL,
@@ -213,13 +212,20 @@ CREATE TABLE `expenses` (
   FOREIGN KEY (`project_id`) REFERENCES `projects`(`id`), FOREIGN KEY (`recorded_by`) REFERENCES `users`(`id`)
 );
 
--- Client-to-accounting purchase workflow additions.
+-- Client request and confirmed booking records use two linked tables.
+CREATE TABLE `flats` (
+  `id` INT NOT NULL AUTO_INCREMENT PRIMARY KEY, `project_id` INT NOT NULL,
+  `flat_name` VARCHAR(50) NOT NULL, `price` DECIMAL(12,2) NOT NULL,
+  `created_at` TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP, `updated_at` TIMESTAMP NULL DEFAULT NULL,
+  UNIQUE KEY `flats_project_flat_name_unique` (`project_id`, `flat_name`),
+  FOREIGN KEY (`project_id`) REFERENCES `projects`(`id`) ON DELETE CASCADE
+);
 CREATE TABLE `booking_requests` (
   `id` INT NOT NULL AUTO_INCREMENT PRIMARY KEY, `request_no` VARCHAR(24) NOT NULL UNIQUE,
   `project_id` INT NOT NULL, `client_id` INT NOT NULL, `unit_label` VARCHAR(50) NOT NULL,
   `agreed_amount` DECIMAL(12,2) NOT NULL, `initial_payment_amount` DECIMAL(12,2) NOT NULL,
   `payment_method` VARCHAR(30) NOT NULL, `payment_reference` VARCHAR(100) NULL, `client_message` TEXT NULL,
-  `status` VARCHAR(30) NOT NULL DEFAULT 'pending_manager' COMMENT 'pending_manager, pending_accountant, approved, rejected',
+  `status` VARCHAR(30) NOT NULL DEFAULT 'pending_manager',
   `manager_reviewed_by` INT NULL, `manager_reviewed_at` TIMESTAMP NULL, `accountant_reviewed_by` INT NULL,
   `accountant_reviewed_at` TIMESTAMP NULL, `rejection_note` VARCHAR(255) NULL,
   `created_at` TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP, `updated_at` TIMESTAMP NULL DEFAULT NULL,
@@ -234,8 +240,9 @@ CREATE TABLE `bookings` (
   `status` VARCHAR(20) NOT NULL DEFAULT 'booked' COMMENT 'booked=confirmed booking', `created_by` INT NOT NULL,
   `created_at` TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP, `updated_at` TIMESTAMP NULL DEFAULT NULL,
   UNIQUE KEY `bookings_project_unit_unique` (`project_id`, `unit_label`),
-  FOREIGN KEY (`booking_request_id`) REFERENCES `booking_requests`(`id`), FOREIGN KEY (`project_id`) REFERENCES `projects`(`id`),
-  FOREIGN KEY (`client_id`) REFERENCES `clients`(`id`), FOREIGN KEY (`created_by`) REFERENCES `users`(`id`)
+  FOREIGN KEY (`booking_request_id`) REFERENCES `booking_requests`(`id`),
+  FOREIGN KEY (`project_id`) REFERENCES `projects`(`id`), FOREIGN KEY (`client_id`) REFERENCES `clients`(`id`),
+  FOREIGN KEY (`created_by`) REFERENCES `users`(`id`)
 );
 CREATE TABLE `client_payments` (
   `id` INT NOT NULL AUTO_INCREMENT PRIMARY KEY, `booking_id` INT NOT NULL, `amount` DECIMAL(12,2) NOT NULL,
