@@ -2,43 +2,34 @@
 
 ## Purpose and stack
 
-The repository is a Laravel 9/PHP 8 project intended to grow into a construction management system. It uses Blade templates, Laravel's session-based web authentication, Eloquent, MySQL by default, Sanctum for the stock authenticated API user endpoint, and Vite for frontend asset builds. The admin UI is based on SB Admin 2. The public landing page uses a separate news-style template and static/local frontend assets.
+Laravel 9 application using PHP 8, Blade, MySQL, session-based authentication, and the SB Admin 2 backend theme. The public site uses the existing frontend layout and homepage. Core construction CREATE statements are in `mysql.sql`; see [database-context.md](database-context.md).
 
-Dependencies and common commands are defined in `composer.json` and `package.json`. The README describes Composer installation, `.env` setup, key generation, and migrations. No project-specific feature test coverage is present; current tests are Laravel example stubs.
+## Client purchase workflow
 
-## Current request flow
+- `GET /` shows projects on the public homepage. The public **Buy a flat** link opens `GET /booking-request`.
+- A buyer first registers at `/client-register`. The account is created as role 8 with `status=0`, cannot log in yet, and waits for Admin approval in Client Management. Approval activates the User and creates/links the row in `clients`; only then can that buyer request a flat.
+- Admin enters project flats on the existing `projects` row, one per line as `A-101 | 2500000`, and marks completion by setting `actual_end_date`. Only completed projects and their free flat cards appear in the purchase form. The server checks the selected project's completion, flat listing, price, and availability before accepting the request.
+- A client submits contact details, selected project/flat, initial payment amount, payment method, and optional reference. The system creates/finds the client and saves a request with `pending_manager` status. It returns a request number that can be checked with the client's email at `/request-status`.
+- A Project Manager (role ID 2) reviews requests only for projects assigned to their User account. Approval sends a request to the Accountant (`pending_accountant`); rejection closes the request.
+- An Accountant (role ID 7) verifies and approves the initial payment. The system creates the booking and approved payment in one database transaction. The initial amount may be partial or equal to the full price.
+- The Accountant can record later payments; they stay pending until approved. Only approved payments count as income or reduce the client's displayed balance.
+- Project Managers and Accountants can record project expenses. Admin, Project Manager, and Accountant can open the financial report. A Client login (role ID 8) sees only matching client bookings and approved payments from **My Bookings & Payments**.
+- Admin creates projects with an estimated finish date and assigns a Designer/Architect User. The assigned Designer records actual project expenses and sets the actual finish date. The project's recorded expenses are summed in the project screen and report; setting the finish date makes it eligible to appear for purchase.
+- Project Manager and Designer accounts are User roles assigned directly to project rows. There is no separate Staff management screen/table in the reduced workflow.
 
-- `GET /` → `FrontendController@index` → `resources/views/homepage.blade.php`.
-- `GET /login` renders `Backend/Auth/login.blade.php`; `POST /login` validates email/password and calls Laravel `Auth::attempt()`.
-- Successful login regenerates the session and redirects to the named `dashboard` route. Failed login returns to the form with a `failed` flash message.
-- `/admin` routes are grouped behind the custom `authCheck` middleware. `/admin/` redirects to the dashboard; `/admin/dashboard` renders a static dashboard; `POST /admin/logout` logs out.
-- `routes/api.php` only exposes Laravel's default `GET /api/user` under `auth:sanctum`.
-- The admin sidebar contains many placeholder `href="#"` entries for features that do not yet have routes or controllers.
+## Current routes and code areas
 
-## Main code areas
+- Public request and status pages: `FrontendController`, `resources/views/frontend/booking-request.blade.php`, and `resources/views/frontend/request-status.blade.php`.
+- Review queue, payment entry/approval, project expenses, and report: `BookingWorkflowController` and `resources/views/Backend/bookings/`.
+- Authenticated web routes are in `routes/web.php`; role checks are handled by the workflow controller. The existing `password_hash` mapping remains in `User::getAuthPassword()`.
+- The sidebar links the existing role menus to booking requests, client bookings, and the separate financial report.
 
-- `routes/`: web, API, broadcast-channel, and console routes.
-- `app/Http/Controllers/`: public landing controller and backend login/dashboard/role controllers. Most resource methods are empty stubs.
-- `app/Models/`: `User` and `Role` match the authentication/authorization starter domain. Other models (`BlogPost`, `Category`, `Comment`, `Frontend`, `GeneralSetting`, `Login`, `Subscriber`) look like legacy/news-site leftovers and are not wired to current routes.
-- `resources/views/Backend/`: login, static dashboard, shared admin layout/topbar/sidebar, and a standalone template page (`tables.blade.php`).
-- `resources/views/frontend/` and `homepage.blade.php`: public news-template views. Current content is mostly static or placeholder content.
-- `database/`: two migrations (users and roles), initial seeders, and a default factory.
-- `public/Backend/`: SB Admin 2 CSS, JS, SCSS, and images. Frontend assets are referenced from `public/frontend/`.
+## Scope and limits
 
-## Authentication and access notes
+- Payment details are entered manually and verified by the Accountant. There is no online payment gateway or automatic bank confirmation.
+- The GET finance report shows project income/expenses and client flat payment/balance summaries, with a print button. Expenses are not split among individual flats because the supplied expense schema is project-based.
+- Other planned modules and placeholder navigation remain outside this semester workflow.
 
-`User::getAuthPassword()` maps Laravel's expected password field to `password_hash`. Seeded passwords are hashed with Laravel's `Hash::make()`. `AuthCheckMiddleware` checks only whether a user is logged in; it does not check their role, status, or permissions. Eight role names are seeded, but no role-based route or feature authorization is implemented. The separate `AuthMiddlewareCheck` class is currently unused.
+## Demo walkthrough
 
-## Known implementation gaps
-
-- Dashboard metrics and charts are hardcoded template/demo values, not database aggregates.
-- Role CRUD methods are empty; project, client, staff, task, milestone, document, supplier, purchasing, inventory, reporting, and transaction workflows do not have corresponding routes/controllers in the current app.
-- The admin navigation reflects planned modules, not functional screens.
-- The current migrations do not create the full `mysql.sql` schema; only users and roles migrations exist, and they do not fully match the SQL definition. See [database-context.md](database-context.md).
-- Legacy content models refer to tables/columns absent from `mysql.sql`; do not assume those tables exist.
-- The README's `php artisan migrate` setup instructions only create the tables represented by the migrations.
-
-## Change orientation
-
-Before implementing a feature, establish whether it belongs to the construction domain in `mysql.sql` or the legacy news-template remnants. For a database feature, inspect all three sources: `mysql.sql`, migrations, and the relevant model/controller. Add migrations and relationships deliberately; do not rely on the SQL dump having been applied. Preserve the existing `password_hash` authentication convention unless changing it is part of the task.
-
+Run `php artisan db:seed` to create demo data without truncating existing roles or users. The seeded logins are `demo.admin@cms.test`, `demo.manager@cms.test`, `demo.designer@cms.test`, `demo.accountant@cms.test`, and `demo.client@cms.test`; each uses `demo12345`. The demo includes requests waiting at both review stages, one part-paid booking, one fully paid booking, a later pending payment, and project expenses.

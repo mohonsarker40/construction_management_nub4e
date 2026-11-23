@@ -15,10 +15,7 @@ class Role extends Model
     public static function validatedData(Request $request, ?self $role = null): array
     {
         return $request->validate([
-            'role_name' => [
-                'required', 'string', 'max:50',
-                Rule::unique('roles', 'role_name')->ignore($role?->id),
-            ],
+            'role_name' => ['required', 'string', 'max:50', Rule::unique('roles', 'role_name')->ignore($role?->id),],
             'description' => ['required', 'string', 'max:255'],
         ]);
     }

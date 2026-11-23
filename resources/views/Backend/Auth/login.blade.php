@@ -22,8 +22,11 @@
                             <div class="p-5">
 
                                 <div class="text-center">
-                                    <h1 class="h4 text-gray-900 mb-4">Admin Login</h1>
+                                    <h1 class="h4 text-gray-900 mb-4">Dashboard Login</h1>
                                 </div>
+
+                                @if(session('registration_pending'))<div class="alert alert-success">{{ session('registration_pending') }}</div>@endif
+                                @if(session('pendingApproval'))<div class="alert alert-warning">{{ session('pendingApproval') }}</div>@endif
 
                                 <form class="user" action="{{ route('doLogin') }}" method="post">
                                     @csrf
@@ -48,6 +51,7 @@
 
                                     <button type="submit" class="btn btn-primary btn-user btn-block">Login</button>
                                 </form>
+                                <div class="text-center mt-3"><a href="{{ route('client.register.form') }}">ক্লায়েন্ট হিসেবে নতুন নিবন্ধন</a></div>
 
                             </div>
                         </div>

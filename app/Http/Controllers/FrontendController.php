@@ -3,14 +3,157 @@
 namespace App\Http\Controllers;
 
 use App\Models\Frontend;
+use App\Models\Booking;
+use App\Models\BookingRequest;
+use App\Models\Client;
+use App\Models\Project;
+use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 
 class FrontendController extends Controller
 {
 
     public function index()
     {
-        return view('homepage');
+        $projects = Project::whereNotNull('actual_end_date')->orderBy('project_name')->get()->map(function ($project) {
+            $project->frontend_units = $this->freeUnits($project);
+            return $project;
+        });
+        return view('homepage', compact('projects'));
+    }
+
+    public function bookingRequestForm()
+    {
+        if (!auth()->check()) return redirect()->route('client.register.form')->with('notice', 'ফ্ল্যাট কেনার আগে ক্লায়েন্ট হিসেবে নিবন্ধন করে অনুমোদনের অপেক্ষা করুন।');
+        abort_unless((int) auth()->user()->role_id === 8, 403);
+        if ((int) auth()->user()->status !== 1) return view('frontend.client-pending');
+        $client = Client::where('user_id', auth()->id())->where('status', 1)->firstOrFail();
+
+        $projects = Project::with(['manager', 'designer'])->whereNotNull('actual_end_date')->orderBy('project_name')->get()->map(function ($project) {
+            $project->frontend_units = $this->freeUnits($project);
+            return $project;
+        })->filter(fn ($project) => count($project->frontend_units) > 0)->values();
+        $selectedProjectId = request()->query('project_id');
+        return view('frontend.booking-request', compact('projects', 'client', 'selectedProjectId'));
+    }
+
+    public function clientRegisterForm()
+    {
+        return view('frontend.client-register');
+    }
+
+    public function clientRegister(Request $request)
+    {
+        $data = $request->validate([
+            'full_name' => ['required', 'string', 'max:100'],
+            'email' => ['required', 'email', 'max:100', 'unique:users,email'],
+            'phone' => ['required', 'string', 'max:20'],
+            'address' => ['nullable', 'string', 'max:255'],
+            'password' => ['required', 'string', 'min:8', 'confirmed'],
+        ]);
+        $password = $data['password'];
+        unset($data['address'], $data['password'], $data['password_confirmation']);
+        $data['role_id'] = 8;
+        $data['status'] = 0;
+        $data['password_hash'] = Hash::make($password);
+        User::create($data);
+
+        return redirect()->route('login')->with('registration_pending', 'নিবন্ধন জমা হয়েছে। Admin অনুমোদন করলে আপনি লগইন করে ফ্ল্যাট বাছতে পারবেন।');
+    }
+
+    private function freeUnits(Project $project): array
+    {
+        $reserved = BookingRequest::where('project_id', $project->id)
+            ->whereIn('status', [BookingRequest::PENDING_MANAGER, BookingRequest::PENDING_ACCOUNTANT, BookingRequest::APPROVED])
+            ->pluck('unit_label')->map(fn ($label) => strtolower($label));
+        $booked = Booking::where('project_id', $project->id)->pluck('unit_label')->map(fn ($label) => strtolower($label));
+        return collect($project->listedUnits())
+            ->reject(fn ($unit) => $reserved->contains(strtolower($unit['label'])) || $booked->contains(strtolower($unit['label'])))
+            ->values()->all();
+    }
+
+    public function submitBookingRequest(Request $request)
+    {
+        abort_unless(auth()->check() && (int) auth()->user()->role_id === 8 && (int) auth()->user()->status === 1, 403);
+        $client = Client::where('user_id', auth()->id())->where('status', 1)->firstOrFail();
+        $data = BookingRequest::validatedData($request);
+
+        $bookingRequest = DB::transaction(function () use ($data, $client) {
+            $project = Project::whereKey($data['project_id'])->lockForUpdate()->firstOrFail();
+            if (!$project->actual_end_date) {
+                throw ValidationException::withMessages(['project_id' => 'প্রজেক্ট সম্পন্ন না হওয়া পর্যন্ত ফ্ল্যাট কেনার অনুরোধ করা যাবে না।']);
+            }
+            $listedUnit = collect($project->listedUnits())->first(fn ($unit) => strtolower($unit['label']) === strtolower($data['unit_label']));
+            if (!$listedUnit || (float) $listedUnit['price'] !== (float) $data['agreed_amount']) {
+                throw ValidationException::withMessages(['unit_label' => 'নির্বাচিত ফ্ল্যাট বা দাম সঠিক নয়। আবার ফ্ল্যাটটি নির্বাচন করুন।']);
+            }
+            $data['unit_label'] = $listedUnit['label'];
+            $data['agreed_amount'] = $listedUnit['price'];
+            $unitKey = strtolower($data['unit_label']);
+            $unitAlreadyTaken = Booking::where('project_id', $project->id)->pluck('unit_label')->contains(fn ($label) => strtolower($label) === $unitKey);
+            $unitAlreadyRequested = BookingRequest::where('project_id', $project->id)
+                ->where('unit_label', $data['unit_label'])
+                ->whereIn('status', [BookingRequest::PENDING_MANAGER, BookingRequest::PENDING_ACCOUNTANT, BookingRequest::APPROVED])
+                ->exists();
+            if (!$unitAlreadyRequested) {
+                $unitAlreadyRequested = BookingRequest::where('project_id', $project->id)
+                    ->whereIn('status', [BookingRequest::PENDING_MANAGER, BookingRequest::PENDING_ACCOUNTANT, BookingRequest::APPROVED])
+                    ->pluck('unit_label')->contains(fn ($label) => strtolower($label) === $unitKey);
+            }
+
+            if ($unitAlreadyTaken || $unitAlreadyRequested) {
+                throw ValidationException::withMessages(['unit_label' => 'This flat/unit is already booked or awaiting approval.']);
+            }
+
+            return BookingRequest::create([
+                'request_no' => 'BR-' . now()->format('ymd') . '-' . Str::upper(Str::random(6)),
+                'project_id' => $project->id,
+                'client_id' => $client->id,
+                'unit_label' => $data['unit_label'],
+                'agreed_amount' => $data['agreed_amount'],
+                'initial_payment_amount' => $data['initial_payment_amount'],
+                'payment_method' => $data['payment_method'],
+                'payment_reference' => $data['payment_reference'] ?? null,
+                'client_message' => $data['client_message'] ?? null,
+                'status' => BookingRequest::PENDING_MANAGER,
+            ]);
+        });
+
+        return redirect()->route('booking.request.status.form')->with('request_received', [
+            'request_no' => $bookingRequest->request_no,
+            'email' => $bookingRequest->client->email,
+            'project' => $bookingRequest->project->project_name,
+            'unit' => $bookingRequest->unit_label,
+            'agreed_amount' => $bookingRequest->agreed_amount,
+            'initial_payment_amount' => $bookingRequest->initial_payment_amount,
+        ]);
+    }
+
+    public function requestStatusForm()
+    {
+        return view('frontend.request-status');
+    }
+
+    public function requestStatus(Request $request)
+    {
+        $data = $request->validate([
+            'request_no' => ['required', 'string', 'max:24'],
+            'email' => ['required', 'email', 'max:100'],
+        ]);
+        $bookingRequest = BookingRequest::with('project', 'client')
+            ->where('request_no', strtoupper($data['request_no']))
+            ->whereHas('client', fn ($query) => $query->where('email', $data['email']))
+            ->first();
+
+        if (!$bookingRequest) {
+            return back()->withErrors(['request_no' => 'No request matches that number and email.'])->withInput();
+        }
+
+        return view('frontend.request-status', compact('bookingRequest'));
     }
 
 

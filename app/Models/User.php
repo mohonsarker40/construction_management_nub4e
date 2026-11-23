@@ -28,6 +28,21 @@ class User extends Authenticatable
         return $this->belongsTo(Role::class);
     }
 
+    public function client()
+    {
+        return $this->hasOne(Client::class);
+    }
+
+    public function managedProjects()
+    {
+        return $this->hasMany(Project::class, 'manager_user_id');
+    }
+
+    public function designedProjects()
+    {
+        return $this->hasMany(Project::class, 'designer_user_id');
+    }
+
     public static function validatedData(Request $request, ?self $user = null): array
     {
         return $request->validate([

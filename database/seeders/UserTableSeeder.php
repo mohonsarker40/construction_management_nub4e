@@ -12,8 +12,6 @@ class UserTableSeeder extends Seeder
 
     public function run()
     {
-        User::truncate();
-
         $arrUser = [
             [
                 'role_id'       => 1, // Admin
