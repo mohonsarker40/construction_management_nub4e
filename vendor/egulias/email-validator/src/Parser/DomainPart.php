@@ -177,6 +177,18 @@ class DomainPart extends PartParser
                 $literalResult = $this->parseDomainLiteral();
 
                 $this->addTLDWarnings($tldMissing);
+                if ($literalResult->isInvalid()) {
+                    return $literalResult;
+                }
+
+                $this->lexer->moveNext();
+                if (!$this->lexer->current->isA(EmailLexer::S_EMPTY)) {
+                    return new InvalidEmail(
+                        new ExpectingATEXT('Unexpected data after domain literal'),
+                        $this->lexer->current->value
+                    );
+                }
+
                 return $literalResult;
             }
 
@@ -307,6 +319,7 @@ class DomainPart extends PartParser
     {
         if (preg_match('/[^\x00-\x7F]/', $label)) {
             idn_to_ascii($label, IDNA_DEFAULT, INTL_IDNA_VARIANT_UTS46, $idnaInfo);
+            /** @psalm-var array{errors: int, ...} $idnaInfo */
             return (bool) ($idnaInfo['errors'] & IDNA_ERROR_LABEL_TOO_LONG);
         }
         return strlen($label) > self::LABEL_MAX_LENGTH;

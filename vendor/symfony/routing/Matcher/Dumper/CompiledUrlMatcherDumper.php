@@ -37,17 +37,17 @@ class CompiledUrlMatcherDumper extends MatcherDumper
     public function dump(array $options = []): string
     {
         return <<<EOF
-<?php
+            <?php
 
-/**
- * This file has been auto-generated
- * by the Symfony Routing Component.
- */
+            /**
+             * This file has been auto-generated
+             * by the Symfony Routing Component.
+             */
 
-return [
-{$this->generateCompiledRoutes()}];
+            return [
+            {$this->generateCompiledRoutes()}];
 
-EOF;
+            EOF;
     }
 
     /**
@@ -85,7 +85,7 @@ EOF;
 
         [$staticRoutes, $dynamicRoutes] = $this->groupStaticRoutes($routes);
 
-        $conditions = [null];
+        $conditions = ['' => null];
         $compiledRoutes[] = $this->compileStaticRoutes($staticRoutes, $conditions);
         $chunkLimit = \count($dynamicRoutes);
 
@@ -107,7 +107,7 @@ EOF;
         if ($forDump) {
             $compiledRoutes[2] = $compiledRoutes[4];
         }
-        unset($conditions[0]);
+        unset($conditions['']);
 
         if ($conditions) {
             foreach ($conditions as $expression => $condition) {
@@ -115,12 +115,12 @@ EOF;
             }
 
             $checkConditionCode = <<<EOF
-    static function (\$condition, \$context, \$request, \$params) { // \$checkCondition
-        switch (\$condition) {
-{$this->indent(implode("\n", $conditions), 3)}
-        }
-    }
-EOF;
+                    static function (\$condition, \$context, \$request, \$params) { // \$checkCondition
+                        switch (\$condition) {
+                {$this->indent(implode("\n", $conditions), 3)}
+                        }
+                    }
+                EOF;
             $compiledRoutes[4] = $forDump ? $checkConditionCode.",\n" : eval('return '.$checkConditionCode.';');
         } else {
             $compiledRoutes[4] = $forDump ? "    null, // \$checkCondition\n" : null;
@@ -137,7 +137,7 @@ EOF;
 
         $code .= '[ // $staticRoutes'."\n";
         foreach ($staticRoutes as $path => $routes) {
-            $code .= sprintf("    %s => [\n", self::export($path));
+            $code .= \sprintf("    %s => [\n", self::export($path));
             foreach ($routes as $route) {
                 $code .= vsprintf("        [%s, %s, %s, %s, %s, %s, %s],\n", array_map([__CLASS__, 'export'], $route));
             }
@@ -145,11 +145,11 @@ EOF;
         }
         $code .= "],\n";
 
-        $code .= sprintf("[ // \$regexpList%s\n],\n", $regexpCode);
+        $code .= \sprintf("[ // \$regexpList%s\n],\n", $regexpCode);
 
         $code .= '[ // $dynamicRoutes'."\n";
         foreach ($dynamicRoutes as $path => $routes) {
-            $code .= sprintf("    %s => [\n", self::export($path));
+            $code .= \sprintf("    %s => [\n", self::export($path));
             foreach ($routes as $route) {
                 $code .= vsprintf("        [%s, %s, %s, %s, %s, %s, %s],\n", array_map([__CLASS__, 'export'], $route));
             }
@@ -222,7 +222,12 @@ EOF;
         foreach ($staticRoutes as $url => $routes) {
             $compiledRoutes[$url] = [];
             foreach ($routes as $name => [$route, $hasTrailingSlash]) {
-                $compiledRoutes[$url][] = $this->compileRoute($route, $name, (!$route->compile()->getHostVariables() ? $route->getHost() : $route->compile()->getHostRegex()) ?: null, $hasTrailingSlash, false, $conditions);
+                if ($route->compile()->getHostVariables()) {
+                    $host = $route->compile()->getHostRegex();
+                } elseif ($host = $route->getHost()) {
+                    $host = strtolower($host);
+                }
+                $compiledRoutes[$url][] = $this->compileRoute($route, $name, $host ?: null, $hasTrailingSlash, false, $conditions);
             }
         }
 
@@ -313,6 +318,17 @@ EOF;
                         $state->vars = [];
                         $hostRegex = '(?i:'.preg_replace_callback('#\?P<([^>]++)>#', $state->getVars, $rx[1]).')\.';
                         $state->hostVars = $state->vars;
+
+                        if ($state->hostVars) {
+                            // Group 1 captures the path so that host variables cannot match any part of it.
+                            // Group 1 is mapped to the first host variable, then the group of that variable overwrites it.
+                            // The first lookahead skips the capture when the host cannot match.
+                            // It is left out when requirements contain named groups, because a regexp can't define the same name twice.
+                            $hostCheck = preg_replace('#\?P<[^>]++>#', '?:', $rx[1]);
+                            $hostCheck = preg_match('#\(\?(?:<[^=!]|\')#', $hostCheck) ? '' : '(?=(?i:'.$hostCheck.')\.)';
+                            $hostRegex = $hostCheck.'(?=[^/]*+(.*+))'.$hostRegex.'(?=\1)';
+                            array_unshift($state->hostVars, $state->hostVars[0]);
+                        }
                     } else {
                         $hostRegex = '(?:(?:[^./]*+\.)++)';
                         $state->hostVars = [];
@@ -402,7 +418,7 @@ EOF;
 
             $state->mark += 3 + $state->markTail + \strlen($regex) - $prefixLen;
             $state->markTail = 2 + \strlen($state->mark);
-            $rx = sprintf('|%s(*:%s)', substr($regex, $prefixLen), $state->mark);
+            $rx = \sprintf('|%s(*:%s)', substr($regex, $prefixLen), $state->mark);
             $code .= "\n            .".self::export($rx);
             $state->regex .= $rx;
 
@@ -425,7 +441,7 @@ EOF;
             unset($defaults['_canonical_route']);
         }
 
-        if ($condition = $route->getCondition()) {
+        if ('' !== $condition = $route->getCondition()) {
             $condition = $this->getExpressionLanguage()->compile($condition, ['context', 'request', 'params']);
             $condition = $conditions[$condition] ??= (str_contains($condition, '$request') ? 1 : -1) * \count($conditions);
         } else {
