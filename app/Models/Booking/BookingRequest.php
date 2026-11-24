@@ -10,11 +10,8 @@ use Illuminate\Http\Request;
 class BookingRequest extends Model
 {
     public const PENDING_MANAGER = 'pending_manager';
-
     public const PENDING_ACCOUNTANT = 'pending_accountant';
-
     public const APPROVED = 'approved';
-
     public const REJECTED = 'rejected';
 
     protected $fillable = [

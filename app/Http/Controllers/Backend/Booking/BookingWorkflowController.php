@@ -26,16 +26,26 @@ class BookingWorkflowController extends Controller
 
     private function managedProjectIds()
     {
-        return Project::where('manager_user_id', auth()->id())->pluck('id');
+        return Project::where('manager_user_id', auth()->id())
+            ->pluck('id');
     }
 
     public function projectIndex()
     {
         $this->allow([1]);
         $roleId = 1;
-        $projects = Project::with(['manager', 'designer'])->withSum('expenses', 'amount')->orderBy('project_name')->get();
-        $managers = User::where('role_id', 2)->where('status', 1)->orderBy('full_name')->get();
-        $designers = User::where('role_id', 4)->where('status', 1)->orderBy('full_name')->get();
+        $projects = Project::with(['manager', 'designer'])
+            ->withSum('expenses', 'amount')
+            ->orderBy('project_name')
+            ->get();
+        $managers = User::where('role_id', 2)
+            ->where('status', 1)
+            ->orderBy('full_name')
+            ->get();
+        $designers = User::where('role_id', 4)
+            ->where('status', 1)
+            ->orderBy('full_name')
+            ->get();
         $requests = collect();
         $bookings = collect();
         $pendingPayments = collect();
@@ -50,25 +60,38 @@ class BookingWorkflowController extends Controller
         $showProjectsOnly = false;
         $projectIds = $roleId === 2 ? $this->managedProjectIds() : ($roleId === 4 ? Project::where('designer_user_id', auth()->id())->pluck('id') : null);
 
-        $projects = Project::with(['manager', 'designer'])->withSum('expenses', 'amount')
+        $projects = Project::with(['manager', 'designer'])
+            ->withSum('expenses', 'amount')
             ->when($projectIds !== null, fn ($query) => $query->whereIn('id', $projectIds))
-            ->orderBy('project_name')->get();
-        $clients = $roleId === 1 ? Client::where('status', 1)->orderBy('client_name')->get() : collect();
-        $managers = $roleId === 1 ? User::where('role_id', 2)->where('status', 1)->orderBy('full_name')->get() : collect();
-        $designers = $roleId === 1 ? User::where('role_id', 4)->where('status', 1)->orderBy('full_name')->get() : collect();
+            ->orderBy('project_name')
+            ->get();
+        $clients = $roleId === 1 ? Client::where('status', 1)
+            ->orderBy('client_name')
+            ->get() : collect();
+        $managers = $roleId === 1 ? User::where('role_id', 2)
+            ->where('status', 1)
+            ->orderBy('full_name')
+            ->get() : collect();
+        $designers = $roleId === 1 ? User::where('role_id', 4)
+            ->where('status', 1)
+            ->orderBy('full_name')
+            ->get() : collect();
 
         $requests = BookingRequest::with(['project', 'client', 'booking'])
             ->whereHas('project', fn ($query) => $query->where('budget', '>', 0)->whereHas('expenses'))
             ->when($projectIds !== null, fn ($query) => $query->whereIn('project_id', $projectIds))
-            ->orderByDesc('created_at')->get();
+            ->orderByDesc('created_at')
+            ->get();
 
-        $bookingsQuery = Booking::with(['project', 'client', 'payments'])->where('status', Booking::BOOKED);
+        $bookingsQuery = Booking::with(['project', 'client', 'payments'])
+            ->where('status', Booking::BOOKED);
         if ($projectIds !== null) {
             $bookingsQuery->whereIn('project_id', $projectIds);
         }
         $bookings = $bookingsQuery->orderByDesc('booking_date')->get();
 
-        $pendingPaymentsQuery = ClientPayment::with('booking.project', 'booking.client')->where('status', ClientPayment::PENDING);
+        $pendingPaymentsQuery = ClientPayment::with('booking.project', 'booking.client')
+            ->where('status', ClientPayment::PENDING);
         if ($projectIds !== null) {
             $pendingPaymentsQuery->whereHas('booking', fn ($q) => $q->whereIn('project_id', $projectIds));
         }
@@ -81,18 +104,32 @@ class BookingWorkflowController extends Controller
     {
         $this->allow([1]);
         $data = Project::validatedData($request);
-        $unitTotalCents = collect($data['flats'])->sum(fn ($flat) => (int) round((float) $flat['price'] * 100));
-        if ($unitTotalCents > (int) round((float) $data['budget'] * 100)) {
-            throw ValidationException::withMessages(['flats' => 'সব flat-এর মোট দাম project budget-এর বেশি হতে পারবে না।']);
+//        $this->ddA($data);
+        $flatTotal = collect($data['flats'])
+            ->sum(fn ($flat) => (int) round((float) $flat['price'] * 100));
+        if ($flatTotal > (int) round((float) $data['budget'] * 100)) {
+            throw ValidationException::withMessages([
+                'flats' => 'সব flat-এর মোট দাম project budget-এর বেশি হতে পারবে না।'
+            ]);
         }
-        $flatNames = collect($data['flats'])->pluck('flat_name')->map(fn ($name) => mb_strtolower(trim($name)));
+        $flatNames = collect($data['flats'])
+            ->pluck('flat_name')->map(fn ($name) => mb_strtolower(trim($name)));
         if ($flatNames->unique()->count() !== $flatNames->count()) {
-            throw ValidationException::withMessages(['flats' => 'একই ফ্ল্যাট নম্বর একাধিকবার দেওয়া যাবে না।']);
+            throw ValidationException::withMessages([
+                'flats' => 'একই ফ্ল্যাট নম্বর একাধিকবার দেওয়া যাবে না।'
+            ]);
         }
+
         if (! empty($data['manager_user_id'])) {
-            abort_unless(User::whereKey($data['manager_user_id'])->where('role_id', 2)->exists(), 422, 'নির্বাচিত অ্যাকাউন্টটি Project Manager হতে হবে।');
+            abort_unless(User::whereKey($data['manager_user_id'])
+                ->where('role_id', 2)
+                ->exists(), 422, 'নির্বাচিত অ্যাকাউন্টটি Project Manager হতে হবে।');
         }
-        abort_unless(User::whereKey($data['designer_user_id'])->where('role_id', 4)->where('status', 1)->exists(), 422, 'নির্বাচিত অ্যাকাউন্টটি সক্রিয় Designer/Architect হতে হবে।');
+        abort_unless(User::whereKey($data['designer_user_id'])
+            ->where('role_id', 4)
+            ->where('status', 1)
+            ->exists(), 422, 'নির্বাচিত অ্যাকাউন্টটি সক্রিয় Designer/Architect হতে হবে।');
+
         $data['created_by'] = auth()->id();
         DB::transaction(function () use ($data) {
             $flats = $data['flats'];
@@ -110,7 +147,9 @@ class BookingWorkflowController extends Controller
         $assignedUserId = $roleId === 2 ? $project->manager_user_id : $project->designer_user_id;
         abort_unless((int) $assignedUserId === (int) auth()->id(), 403);
         abort_unless(! $project->actual_end_date, 422, 'Project completion date is already set.');
-        $data = $request->validate(['actual_end_date' => ['required', 'date', 'before_or_equal:today']]);
+        $data = $request->validate([
+            'actual_end_date' => ['required', 'date', 'before_or_equal:today']
+        ]);
         $project->update(['actual_end_date' => $data['actual_end_date']]);
 
         return back()->with('success', 'প্রজেক্ট সম্পন্ন হিসেবে চিহ্নিত হয়েছে।');
@@ -132,7 +171,10 @@ class BookingWorkflowController extends Controller
     {
         $this->allow([1]);
         $data = $request->validate(['designer_user_id' => ['required', 'exists:users,id']]);
-        abort_unless(User::whereKey($data['designer_user_id'])->where('role_id', 4)->where('status', 1)->exists(), 422);
+        abort_unless(User::whereKey($data['designer_user_id'])
+            ->where('role_id', 4)
+            ->where('status', 1)
+            ->exists(), 422);
         $project->update(['designer_user_id' => $data['designer_user_id']]);
 
         return back()->with('success', 'Designer/Architect assignment saved.');
@@ -170,7 +212,9 @@ class BookingWorkflowController extends Controller
         ]);
 
         DB::transaction(function () use ($bookingRequest, $data) {
-            $lockedRequest = BookingRequest::whereKey($bookingRequest->id)->lockForUpdate()->firstOrFail();
+            $lockedRequest = BookingRequest::whereKey($bookingRequest->id)
+                ->lockForUpdate()
+                ->firstOrFail();
             abort_unless($lockedRequest->status === BookingRequest::PENDING_ACCOUNTANT, 422, 'This request is not waiting for Accountant review.');
 
             if ($data['decision'] === 'reject') {
@@ -225,7 +269,9 @@ class BookingWorkflowController extends Controller
         $this->allow([7]);
         abort_unless($payment->status === ClientPayment::PENDING, 422, 'Only a pending payment can be approved.');
         $booking = $payment->booking;
-        $approved = (float) ClientPayment::where('booking_id', $booking->id)->where('status', ClientPayment::APPROVED)->sum('amount');
+        $approved = (float) ClientPayment::where('booking_id', $booking->id)
+            ->where('status', ClientPayment::APPROVED)
+            ->sum('amount');
         abort_unless($approved === 0.0 && (int) round((float) $payment->amount * 100) === (int) round((float) $booking->agreed_amount * 100), 422, 'Only one full flat-price payment can be approved.');
         $payment->update(['status' => ClientPayment::APPROVED, 'approved_by' => auth()->id(), 'approved_at' => now()]);
 
@@ -244,8 +290,11 @@ class BookingWorkflowController extends Controller
             'expenses.*.description' => ['nullable', 'string', 'max:255'],
         ]);
 
+//        $this->ddA($request);
         DB::transaction(function () use ($data, $roleId) {
-            $project = Project::whereKey($data['project_id'])->lockForUpdate()->firstOrFail();
+            $project = Project::whereKey($data['project_id'])
+                ->lockForUpdate()
+                ->firstOrFail();
 
             if ($roleId === 2) {
                 abort_unless((int) $project->manager_user_id === (int) auth()->id(), 403);
@@ -282,26 +331,43 @@ class BookingWorkflowController extends Controller
         $roleId = $this->allow([1, 2, 4, 7, 8]);
         if ($roleId === 8) {
             $user = auth()->user();
-            $client = Client::where('user_id', $user->id)->where('status', 1)->firstOrFail();
+            $client = Client::where('user_id', $user->id)
+                ->where('status', 1)
+                ->firstOrFail();
             $bookings = Booking::with(['project', 'payments' => fn ($q) => $q->where('status', ClientPayment::APPROVED)])
-                ->where('client_id', $client->id)->where('status', Booking::BOOKED)->orderByDesc('booking_date')->get();
+                ->where('client_id', $client->id)
+                ->where('status', Booking::BOOKED)
+                ->orderByDesc('booking_date')
+                ->get();
 
             return view('Backend.bookings.client', compact('bookings'));
         }
 
         $projectIds = $roleId === 2 ? $this->managedProjectIds() : ($roleId === 4 ? Project::where('designer_user_id', auth()->id())->pluck('id') : Project::pluck('id'));
-        $projects = Project::with('manager')->withSum('expenses', 'amount')->whereIn('id', $projectIds)->orderBy('project_name')->get();
+        $projects = Project::with('manager')
+            ->withSum('expenses', 'amount')
+            ->whereIn('id', $projectIds)
+            ->orderBy('project_name')
+            ->get();
         foreach ($projects as $project) {
             $project->flat_value_total = collect($project->listedUnits())->sum('price');
             $project->revenue = ClientPayment::where('status', ClientPayment::APPROVED)
-                ->whereHas('booking', fn ($q) => $q->where('project_id', $project->id))->sum('amount');
+                ->whereHas('booking', fn ($q) => $q->where('project_id', $project->id))
+                ->sum('amount');
         }
         $bookings = Booking::with(['project', 'client', 'payments' => fn ($q) => $q->where('status', ClientPayment::APPROVED)])
-            ->whereIn('project_id', $projectIds)->where('status', Booking::BOOKED)->orderByDesc('booking_date')->get();
-        $payments = ClientPayment::with('booking.project', 'booking.client')->where('status', ClientPayment::APPROVED)
-            ->whereHas('booking', fn ($q) => $q->whereIn('project_id', $projectIds))->orderByDesc('payment_date')->get();
+            ->whereIn('project_id', $projectIds)
+            ->where('status', Booking::BOOKED)
+            ->orderByDesc('booking_date')
+            ->get();
+        $payments = ClientPayment::with('booking.project', 'booking.client')
+            ->where('status', ClientPayment::APPROVED)
+            ->whereHas('booking', fn ($q) => $q->whereIn('project_id', $projectIds))
+            ->orderByDesc('payment_date')
+            ->get();
         $revenueTotal = $payments->sum('amount');
-        $expenseTotal = Expense::whereIn('project_id', $projectIds)->sum('amount');
+        $expenseTotal = Expense::whereIn('project_id', $projectIds)
+            ->sum('amount');
 
         return view('Backend.bookings.report', compact('roleId', 'projects', 'bookings', 'payments', 'revenueTotal', 'expenseTotal'));
     }

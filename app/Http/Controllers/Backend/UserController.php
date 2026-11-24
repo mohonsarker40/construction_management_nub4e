@@ -13,14 +13,17 @@ class UserController extends Controller
 {
     public function index()
     {
-        $records = User::with('role')->orderBy('id')->paginate(10);
+        $records = User::with('role')
+            ->orderBy('id')
+            ->paginate(10);
 
         return view('Backend.users.index', compact('records'));
     }
 
     public function create()
     {
-        $roles = Role::orderBy('role_name')->get();
+        $roles = Role::orderBy('role_name')
+            ->get();
 
         return view('Backend.users.create', compact('roles'));
     }
@@ -38,7 +41,8 @@ class UserController extends Controller
 
     public function edit(User $user)
     {
-        $roles = Role::orderBy('role_name')->get();
+        $roles = Role::orderBy('role_name')
+            ->get();
 
         return view('Backend.users.edit', compact('user', 'roles'));
     }

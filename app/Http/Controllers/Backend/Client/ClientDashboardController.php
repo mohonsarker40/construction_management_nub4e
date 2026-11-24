@@ -13,7 +13,9 @@ class ClientDashboardController extends Controller
     {
         abort_unless((int) auth()->user()->role_id === 8, 403);
 
-        $client = Client::where('user_id', auth()->id())->where('status', 1)->firstOrFail();
+        $client = Client::where('user_id', auth()->id())
+            ->where('status', 1)
+            ->firstOrFail();
         $requests = BookingRequest::with(['project', 'booking'])
             ->where('client_id', $client->id)
             ->latest()

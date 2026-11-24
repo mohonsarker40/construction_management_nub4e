@@ -10,7 +10,7 @@
         <div class="footer-links">
             <a href="{{ url('/') }}#solutions">Project planning</a>
             <a href="{{ url('/') }}#workflow">Team workflow</a>
-            <a href="{{ route('login') }}">Team sign in</a>
+            <a href="{{ route('login') }}">Login</a>
         </div>
         <p>© {{ date('Y') }} Buildwise Construction Management</p>
     </div>

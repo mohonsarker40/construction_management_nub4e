@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="theme-color" content="#f4a62a">
     <meta name="description" content="A clearer way to plan construction projects, coordinate teams, and track materials.">
-    <title>@yield('title', 'Buildwise | Construction Project Management')</title>
+    <title>@yield('title', 'Buildwise | Construction Management')</title>
     <style>
         :root { color-scheme: light; --ink:#17221d; --muted:#67736d; --paper:#f7f8f5; --white:#fff; --line:#e5e9e3; --green:#183d32; --lime:#c8e66b; --orange:#f4a62a; }
         * { box-sizing:border-box; }

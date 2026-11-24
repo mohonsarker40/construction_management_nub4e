@@ -1,67 +1,42 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
   <component name="ChangeListManager">
     <list default="true" id="e0578776-b324-4f09-9e47-c5cc5771e9b2" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/.idea/commandlinetools/Laravel_11_16_26__8_58PM.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/commandlinetools/schemas/frameworkDescriptionVersion1.1.4.xsd" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/laravel-idea.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/phpunit.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/Http/Controllers/Backend/BookingWorkflowController.php" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/Models/Booking.php" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/Models/BookingRequest.php" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/Models/ClientPayment.php" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/Models/Expense.php" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/Models/Project.php" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/database/migrations/2026_11_22_000001_add_user_id_to_clients_table.php" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/database/migrations/2026_11_22_000002_create_projects_table.php" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/database/migrations/2026_11_22_000003_create_booking_requests_table.php" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/database/migrations/2026_11_22_000004_create_bookings_table.php" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/database/migrations/2026_11_22_000005_create_client_payments_table.php" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/database/migrations/2026_11_22_000006_create_expenses_table.php" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/database/migrations/2026_11_22_000007_remove_staff_and_supplier_tables.php" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/database/seeders/BookingWorkflowDemoSeeder.php" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/resources/views/Backend/bookings/client.blade.php" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/resources/views/Backend/bookings/index.blade.php" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/resources/views/Backend/bookings/report.blade.php" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/resources/views/frontend/booking-request.blade.php" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/resources/views/frontend/client-pending.blade.php" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/resources/views/frontend/client-register.blade.php" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/resources/views/frontend/request-status.blade.php" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.env" beforeDir="false" afterPath="$PROJECT_DIR$/.env" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/construction_management_nub4e.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/construction_management_nub4e.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/php.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/php.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/Http/Controllers/Backend/ClientController.php" beforeDir="false" afterPath="$PROJECT_DIR$/app/Http/Controllers/Backend/ClientController.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/Http/Controllers/Backend/DashboardController.php" beforeDir="false" afterPath="$PROJECT_DIR$/app/Http/Controllers/Backend/DashboardController.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/Http/Controllers/Backend/Booking/BookingWorkflowController.php" beforeDir="false" afterPath="$PROJECT_DIR$/app/Http/Controllers/Backend/Booking/BookingWorkflowController.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/Http/Controllers/Backend/Client/ClientController.php" beforeDir="false" afterPath="$PROJECT_DIR$/app/Http/Controllers/Backend/Client/ClientController.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/Http/Controllers/Backend/Client/ClientDashboardController.php" beforeDir="false" afterPath="$PROJECT_DIR$/app/Http/Controllers/Backend/Client/ClientDashboardController.php" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/Http/Controllers/Backend/LoginController.php" beforeDir="false" afterPath="$PROJECT_DIR$/app/Http/Controllers/Backend/LoginController.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/Http/Controllers/Backend/StaffController.php" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/Http/Controllers/Backend/SupplierController.php" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/Http/Controllers/Backend/UserController.php" beforeDir="false" afterPath="$PROJECT_DIR$/app/Http/Controllers/Backend/UserController.php" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/Http/Controllers/FrontendController.php" beforeDir="false" afterPath="$PROJECT_DIR$/app/Http/Controllers/FrontendController.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/Models/Client.php" beforeDir="false" afterPath="$PROJECT_DIR$/app/Models/Client.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/Models/Role.php" beforeDir="false" afterPath="$PROJECT_DIR$/app/Models/Role.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/Models/Staff.php" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/Models/Supplier.php" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/Models/User.php" beforeDir="false" afterPath="$PROJECT_DIR$/app/Models/User.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/database/migrations/2026_10_17_145652_create_staff_table.php" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/database/migrations/2026_10_28_083337_create_suppliers_table.php" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/Models/BlogPost.php" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/Models/Booking/BookingRequest.php" beforeDir="false" afterPath="$PROJECT_DIR$/app/Models/Booking/BookingRequest.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/Models/Category.php" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/Models/Comment.php" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/Models/GeneralSetting.php" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/Models/Project/Project.php" beforeDir="false" afterPath="$PROJECT_DIR$/app/Models/Project/Project.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/Models/Subscriber.php" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/database/seeders/DatabaseSeeder.php" beforeDir="false" afterPath="$PROJECT_DIR$/database/seeders/DatabaseSeeder.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/database/seeders/RoleTableSeeder.php" beforeDir="false" afterPath="$PROJECT_DIR$/database/seeders/RoleTableSeeder.php" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/database/seeders/UserTableSeeder.php" beforeDir="false" afterPath="$PROJECT_DIR$/database/seeders/UserTableSeeder.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/docs/database-context.md" beforeDir="false" afterPath="$PROJECT_DIR$/docs/database-context.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/docs/project-context.md" beforeDir="false" afterPath="$PROJECT_DIR$/docs/project-context.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/mysql.sql" beforeDir="false" afterPath="$PROJECT_DIR$/mysql.sql" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/resources/views/Backend/Auth/login.blade.php" beforeDir="false" afterPath="$PROJECT_DIR$/resources/views/Backend/Auth/login.blade.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/resources/views/Backend/clients/create.blade.php" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/resources/views/Backend/bookings/client.blade.php" beforeDir="false" afterPath="$PROJECT_DIR$/resources/views/Backend/bookings/client.blade.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/resources/views/Backend/bookings/index.blade.php" beforeDir="false" afterPath="$PROJECT_DIR$/resources/views/Backend/bookings/index.blade.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/resources/views/Backend/bookings/report.blade.php" beforeDir="false" afterPath="$PROJECT_DIR$/resources/views/Backend/bookings/report.blade.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/resources/views/Backend/client-dashboard.blade.php" beforeDir="false" afterPath="$PROJECT_DIR$/resources/views/Backend/client-dashboard.blade.php" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/resources/views/Backend/clients/edit.blade.php" beforeDir="false" afterPath="$PROJECT_DIR$/resources/views/Backend/clients/edit.blade.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/resources/views/Backend/clients/form.blade.php" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/resources/views/Backend/clients/index.blade.php" beforeDir="false" afterPath="$PROJECT_DIR$/resources/views/Backend/clients/index.blade.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/resources/views/Backend/dashboard.blade.php" beforeDir="false" afterPath="$PROJECT_DIR$/resources/views/Backend/dashboard.blade.php" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/resources/views/Backend/layouts/side.blade.php" beforeDir="false" afterPath="$PROJECT_DIR$/resources/views/Backend/layouts/side.blade.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/resources/views/Backend/staffManagement/index.blade.php" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/resources/views/Backend/suppliers/index.blade.php" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/resources/views/frontend/booking-request.blade.php" beforeDir="false" afterPath="$PROJECT_DIR$/resources/views/frontend/booking-request.blade.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/resources/views/frontend/client-pending.blade.php" beforeDir="false" afterPath="$PROJECT_DIR$/resources/views/frontend/client-pending.blade.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/resources/views/frontend/client-register.blade.php" beforeDir="false" afterPath="$PROJECT_DIR$/resources/views/frontend/client-register.blade.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/resources/views/frontend/footer.blade.php" beforeDir="false" afterPath="$PROJECT_DIR$/resources/views/frontend/footer.blade.php" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/resources/views/frontend/header.blade.php" beforeDir="false" afterPath="$PROJECT_DIR$/resources/views/frontend/header.blade.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/resources/views/homepage.blade.php" beforeDir="false" afterPath="$PROJECT_DIR$/resources/views/homepage.blade.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/routes/web.php" beforeDir="false" afterPath="$PROJECT_DIR$/routes/web.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/resources/views/frontend/master.blade.php" beforeDir="false" afterPath="$PROJECT_DIR$/resources/views/frontend/master.blade.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/resources/views/frontend/request-status.blade.php" beforeDir="false" afterPath="$PROJECT_DIR$/resources/views/frontend/request-status.blade.php" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/storage/logs/laravel.log" beforeDir="false" afterPath="$PROJECT_DIR$/storage/logs/laravel.log" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -199,6 +174,65 @@
       </list>
     </option>
   </component>
+  <component name="NextEditCompletionFeaturesState">
+    <decayedCancelled>
+      <entry key="MS100" value="0.0" />
+      <entry key="MS500" value="1.1304571159521628E-249" />
+      <entry key="S2" value="1.1217594544100333E-62" />
+      <entry key="S5" value="3.158941825997684E-25" />
+      <entry key="S10" value="9.710234775272682E-13" />
+      <entry key="S30" value="2.0586468094655166E-4" />
+      <entry key="S60" value="0.024849717864642046" />
+      <entry key="M2" value="0.2730416802782012" />
+      <entry key="M5" value="1.1935603037425067" />
+      <entry key="M10" value="2.689171930696315" />
+      <entry key="M15" value="4.546374876699661" />
+      <entry key="M30" value="10.134115902788508" />
+      <entry key="H1" value="24.811019041874474" />
+      <entry key="H2" value="73.79319461942555" />
+      <entry key="H4" value="157.65155045724168" />
+      <entry key="D1" value="320.7071688720551" />
+      <entry key="W1" value="364.1579719999287" />
+    </decayedCancelled>
+    <decayedSelected>
+      <entry key="MS100" value="1.0" />
+      <entry key="MS500" value="1.0" />
+      <entry key="S2" value="1.0" />
+      <entry key="S5" value="1.0" />
+      <entry key="S10" value="1.0" />
+      <entry key="S30" value="1.0" />
+      <entry key="S60" value="1.0" />
+      <entry key="M2" value="1.0000000000023448" />
+      <entry key="M5" value="1.000024991697562" />
+      <entry key="M10" value="1.006375118970633" />
+      <entry key="M15" value="1.0421415881422524" />
+      <entry key="M30" value="1.2918434182985536" />
+      <entry key="H1" value="2.0088013277267875" />
+      <entry key="H2" value="4.018128801975124" />
+      <entry key="H4" value="7.373015660355301" />
+      <entry key="D1" value="13.927961904590653" />
+      <entry key="W1" value="15.682951061621997" />
+    </decayedSelected>
+    <decayedShown>
+      <entry key="MS100" value="1.0306086913441009E-7" />
+      <entry key="MS500" value="0.04005149763000602" />
+      <entry key="S2" value="0.44735746631086387" />
+      <entry key="S5" value="0.7248729207495" />
+      <entry key="S10" value="0.8513946915215769" />
+      <entry key="S30" value="0.9479905689389408" />
+      <entry key="S60" value="0.9983116897319358" />
+      <entry key="M2" value="1.259279707714099" />
+      <entry key="M5" value="2.1874360006012057" />
+      <entry key="M10" value="3.69171973487725" />
+      <entry key="M15" value="5.585108546889052" />
+      <entry key="M30" value="11.422627658578126" />
+      <entry key="H1" value="26.8162097450453" />
+      <entry key="H2" value="77.80679660901299" />
+      <entry key="H4" value="165.02008717572286" />
+      <entry key="D1" value="334.63368308883423" />
+      <entry key="W1" value="379.8406898437471" />
+    </decayedShown>
+  </component>
   <component name="PhpWorkspaceProjectConfiguration" interpreter_name="/bin/php">
     <include_path>
       <path value="$PROJECT_DIR$/vendor/ramsey/collection" />
@@ -315,10 +349,10 @@
       <path value="$PROJECT_DIR$/vendor/egulias/email-validator" />
     </include_path>
   </component>
-  <component name="ProjectColorInfo"><![CDATA[{
-  "customColor": "",
-  "associatedIndex": 2
-}]]></component>
+  <component name="ProjectColorInfo">{
+  &quot;customColor&quot;: &quot;&quot;,
+  &quot;associatedIndex&quot;: 2
+}</component>
   <component name="ProjectFrameBounds" extendedState="6">
     <option name="x" value="216" />
     <option name="y" value="1149" />
@@ -449,37 +483,25 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.git.unshallow": "true",
-    "RunOnceActivity.laravel_idea.move_run_console_settings": "true",
-    "RunOnceActivity.typescript.service.memoryLimit.init": "true",
-    "git-widget-placeholder": "mohon",
-    "node.js.detected.package.eslint": "true",
-    "node.js.detected.package.tslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "node.js.selected.package.tslint": "(autodetect)",
-    "nodejs_package_manager_path": "npm"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.laravel_idea.move_run_console_settings&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.typescript.service.memoryLimit.init&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;mohon&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="$PROJECT_DIR$/resources/views" />
       <recent name="$PROJECT_DIR$/resources/views/Backend/Auth" />
     </key>
-  </component>
-  <component name="RunDashboard">
-    <option name="ruleStates">
-      <list>
-        <RuleState>
-          <option name="name" value="ConfigurationTypeDashboardGroupingRule" />
-        </RuleState>
-        <RuleState>
-          <option name="name" value="StatusDashboardGroupingRule" />
-        </RuleState>
-      </list>
-    </option>
   </component>
   <component name="RunManager">
     <configuration name="phpunit.xml" type="PHPUnitRunConfigurationType" factoryName="PHPUnit">
@@ -490,8 +512,8 @@
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
-        <option value="bundled-js-predefined-d6986cc7102b-56aff7b04f6f-JavaScript-PS-263.7307.215" />
-        <option value="bundled-php-predefined-a98d8de5180a-ec844a175cc0-com.jetbrains.php.sharedIndexes-PS-263.7307.215" />
+        <option value="bundled-js-predefined-d6986cc7102b-56aff7b04f6f-JavaScript-PS-263.7307.352" />
+        <option value="bundled-php-predefined-a98d8de5180a-ec844a175cc0-com.jetbrains.php.sharedIndexes-PS-263.7307.352" />
       </set>
     </attachedChunks>
   </component>
@@ -510,7 +532,8 @@
       <workItem from="1792990591494" duration="3793000" />
       <workItem from="1795340644085" duration="48000" />
       <workItem from="1795342192381" duration="4723000" />
-      <workItem from="1795405116509" duration="358000" />
+      <workItem from="1795405116509" duration="5779000" />
+      <workItem from="1795493497803" duration="21951000" />
     </task>
     <servers />
   </component>

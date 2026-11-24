@@ -9,9 +9,9 @@
 
         <div class="nav-links" id="primary-navigation">
             @if(auth()->check() && (int) auth()->user()->role_id === 8)
-                <a href="{{ route('booking.request.form') }}">ফ্ল্যাট কিনুন</a>
+                <a href="{{ route('booking.request.form') }}">Buy Flat</a>
             @else
-                <a href="{{ route('client.register.form') }}">ক্লায়েন্ট নিবন্ধন</a>
+                <a href="{{ route('client.register.form') }}">Client Register</a>
             @endif
             <a href="{{ route('booking.request.status.form') }}">Check request</a>
             <a href="{{ url('/') }}#solutions">Solutions</a>
@@ -19,6 +19,6 @@
             <a href="{{ url('/') }}#contact">Contact</a>
         </div>
 
-        <a class="nav-cta" href="{{ route('login') }}">Team sign in <span aria-hidden="true">↗</span></a>
+        <a class="nav-cta" href="{{ route('login') }}">Login <span aria-hidden="true">↗</span></a>
     </nav>
 </header>

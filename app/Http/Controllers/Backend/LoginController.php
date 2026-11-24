@@ -17,9 +17,13 @@ class LoginController extends Controller
     public function doLogin(Request $request)
     {
         $credentials = User::validatedCredentials($request);
-        $pendingClient = User::where('email', $credentials['email'])->where('role_id', 8)->where('status', 0)->exists();
+        $pendingClient = User::where('email', $credentials['email'])
+            ->where('role_id', 8)
+            ->where('status', 0)
+            ->exists();
         if ($pendingClient) {
-            return back()->withInput($request->only('email'))->with('pendingApproval', 'আপনার ক্লায়েন্ট অ্যাকাউন্ট Admin-এর অনুমোদনের অপেক্ষায় আছে।');
+            return back()->withInput($request->only('email'))
+                ->with('pendingApproval', 'আপনার ক্লায়েন্ট অ্যাকাউন্ট Admin-এর অনুমোদনের অপেক্ষায় আছে।');
         }
 
         if (Auth::attempt($credentials + ['status' => 1])) {

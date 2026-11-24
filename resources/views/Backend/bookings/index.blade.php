@@ -6,8 +6,15 @@
         @if($errors->any())<div class="alert alert-danger">{{ $errors->first() }}</div>@endif
 
         @if($showProjectsOnly)
-            <div class="card shadow mb-4"><div class="card-header py-3"><h6 class="m-0 font-weight-bold text-primary">Create New Project</h6></div><div class="card-body"><p class="text-muted">Create a project, assign a Designer/Architect, and set the expected finish date. Once the project is completed, its available flats will appear on the website and clients will be able to submit purchase requests.</p>
-                    <form method="post" action="{{ route('projects.store') }}">@csrf
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Create New Project</h6>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted">Create a project, assign a Designer/Architect, and set the expected finish date. Once the project is completed, its available flats will appear on the website and clients will be able to submit purchase requests.</p>
+                    <form method="post" action="{{ route('projects.store') }}">
+                        @csrf
+
                         <div class="form-row">
                             <div class="form-group col-md-3">
                                 <label>Project name</label>
@@ -38,9 +45,9 @@
                                 <input name="estimated_end_date" type="date" class="form-control" required>
                             </div>
                             <div class="form-group col-md-3">
-                                <label>Project Manager User</label>
+                                <label>Project Manager</label>
                                 <select name="manager_user_id" class="form-control">
-                                    <option value="">Project Manager Name</option>
+                                    <option value="">Select</option>
                                     @foreach($managers as $manager)
                                         <option value="{{ $manager->id }}">
                                             {{ $manager->full_name }} ({{ $manager->email }})
@@ -51,7 +58,7 @@
                             <div class="form-group col-md-3">
                                 <label>Designer / Architect</label>
                                 <select name="designer_user_id" class="form-control" required>
-                                    <option value="">Choose Designer User</option>
+                                    <option value="">Select</option>
                                     @foreach($designers as $designer)
                                         <option value="{{ $designer->id }}">
                                             {{ $designer->full_name }} ({{ $designer->email }})
@@ -59,6 +66,7 @@
                                     @endforeach
                                 </select>
                             </div>
+{{--                            add row--}}
                             <div class="form-group col-12">
                                 <label>Flat Number and Price</label>
                                 <div id="flat-rows">
@@ -97,9 +105,7 @@
             </div>
             <div class="card shadow mb-4">
                 <div class="card-header py-3">
-                    <h6 class="m-0 font-weight-bold text-primary">
-                        Project List and Details
-                    </h6>
+                    <h6 class="m-0 font-weight-bold text-primary">Project List and Details</h6>
                 </div>
                 <div class="card-body table-responsive">
                     <table class="table table-bordered">
@@ -118,13 +124,32 @@
                                 <td>
                                     <strong>{{ $project->project_name }}</strong><br>
                                     {{ $project->project_type }} · {{ $project->location }}<br>
-                                    <small>{{ $project->actual_end_date ? 'Completed' : 'In Progress' }}</small>
+                                    @if($project->actual_end_date)
+                                        <span class="badge badge-success">Completed</span>
+                                    @else
+                                        <span class="badge badge-warning">In Progress</span>
+                                    @endif
                                 </td>
                                 <td>৳ {{ number_format($project->budget, 2) }}</td>
-                                <td>{{ count($units) }}<br>
-                                    ৳ {{ number_format(collect($units)->sum('price'), 2) }}
+                                <td>{{ count($units) }} Flats,  ৳{{ number_format(collect($units)->sum('price'), 2) }}
                                 </td>
-                                <td>Start: {{ $project->start_date?->format('d M Y') ?? '—' }}<br>Estimated Finish Date: {{ $project->estimated_end_date?->format('d M Y') ?? '—' }}@if($project->actual_end_date)<br>Completed: {{ $project->actual_end_date->format('d M Y') }}@endif</td><td>Manager: {{ $project->manager->full_name ?? 'Not Assigned' }}<br>Designer: {{ $project->designer->full_name ?? 'Not Assigned' }}</td></tr>@empty<tr><td colspan="5" class="text-center text-muted">No projects have been created yet.</td></tr>@endforelse
+                                <td>
+                                    Start: {{ $project->start_date?->format('d M Y') ?? '—' }}<br>
+                                    Estimated Finish Date: {{ $project->estimated_end_date?->format('d M Y') ?? '—' }}
+                                    @if($project->actual_end_date)<br>
+                                        Completed: {{ $project->actual_end_date->format('d M Y') }}
+                                    @endif
+                                </td>
+                                <td>
+                                    Manager: {{ $project->manager->full_name ?? 'Not Assigned' }}<br>
+                                    Designer: {{ $project->designer->full_name ?? 'Not Assigned' }}
+                                </td>
+                            </tr>
+                            @empty
+                            <tr>
+                                <td colspan="5" class="text-center text-muted">No projects have been created yet.</td>
+                            </tr>
+                            @endforelse
                         </tbody>
                     </table>
                 </div>
@@ -136,6 +161,7 @@
                 No projects are assigned to your account yet. Ask Admin to assign a project to your Project Manager User account.
             </div>@endif
 
+{{--        approval projects for manager and designer--}}
         @if(in_array($roleId, [2, 4], true))
             <div class="card shadow mb-4">
                 <div class="card-header py-3">
@@ -168,8 +194,8 @@
                                         @if(!$project->actual_end_date)
                                             <form method="post" action="{{ route('projects.completion', $project) }}" class="form-inline">
                                                 @csrf @method('PATCH')
-                                                <input name="actual_end_date" type="date" max="{{ date('Y-m-d') }}" class="form-control form-control-sm mr-2" required>
-                                                <button class="btn btn-sm btn-success">Mark finished</button>
+                                                <input name="actual_end_date" type="date" min="{{ date('Y-m-d') }}" class="form-control form-control-sm mr-2" required>
+                                                <button class="btn btn-sm btn-success">Mark as finished</button>
                                             </form>
                                         @else
                                             <small class="text-success">Finished {{ $project->actual_end_date->format('d M Y') }} · visible for flat purchase</small>

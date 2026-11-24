@@ -47,10 +47,10 @@
             <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseProject" aria-expanded="false" aria-controls="collapseProject"><i class="fas fa-fw fa-project-diagram"></i><span>Project Management</span></a>
             <div id="collapseProject" class="collapse" data-parent="#accordionSidebar"><div class="collapse-inner rounded">
                 <a class="collapse-item" href="{{ route('projects.index') }}"><i class="fas fa-circle"></i><span>Projects &amp; Design</span></a>
-                <a class="collapse-item" href="#"><i class="fas fa-circle"></i><span>Project Assignments</span></a>
-                <a class="collapse-item" href="#"><i class="fas fa-circle"></i><span>Tasks &amp; Milestones</span></a>
-                <a class="collapse-item" href="#"><i class="fas fa-circle"></i><span>Project Documents</span></a>
-                <a class="collapse-item" href="#"><i class="fas fa-circle"></i><span>Status History</span></a>
+{{--                <a class="collapse-item" href="#"><i class="fas fa-circle"></i><span>Project Assignments</span></a>--}}
+{{--                <a class="collapse-item" href="#"><i class="fas fa-circle"></i><span>Tasks &amp; Milestones</span></a>--}}
+{{--                <a class="collapse-item" href="#"><i class="fas fa-circle"></i><span>Project Documents</span></a>--}}
+{{--                <a class="collapse-item" href="#"><i class="fas fa-circle"></i><span>Status History</span></a>--}}
             </div></div>
         </li>
         <li class="nav-item">
@@ -63,26 +63,39 @@
             <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseReports" aria-expanded="false" aria-controls="collapseReports"><i class="fas fa-fw fa-chart-bar"></i><span>Reports</span></a>
             <div id="collapseReports" class="collapse" data-parent="#accordionSidebar"><div class="collapse-inner rounded">
                 <a class="collapse-item" href="{{ route('reports.finance') }}"><i class="fas fa-circle"></i><span>Project Financial Report</span></a>
-                <a class="collapse-item" href="#"><i class="fas fa-circle"></i><span>Task Reports</span></a>
-                <a class="collapse-item" href="#"><i class="fas fa-circle"></i><span>Inventory &amp; Order Reports</span></a>
+{{--                <a class="collapse-item" href="#"><i class="fas fa-circle"></i><span>Task Reports</span></a>--}}
+{{--                <a class="collapse-item" href="#"><i class="fas fa-circle"></i><span>Inventory &amp; Order Reports</span></a>--}}
             </div></div>
         </li>
     @elseif($roleId === 2)
         <li class="nav-item">
             <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseProjectManager" aria-expanded="false" aria-controls="collapseProjectManager"><i class="fas fa-fw fa-project-diagram"></i><span>My Projects</span></a>
             <div id="collapseProjectManager" class="collapse" data-parent="#accordionSidebar"><div class="collapse-inner rounded">
-                <a class="collapse-item" href="#"><i class="fas fa-circle"></i><span>Projects &amp; Team</span></a>
-                <a class="collapse-item" href="#"><i class="fas fa-circle"></i><span>Tasks &amp; Milestones</span></a>
-                <a class="collapse-item" href="#"><i class="fas fa-circle"></i><span>Project Documents</span></a>
+                <a class="collapse-item" href="{{ route('booking-requests.index') }}"><i class="fas fa-circle"></i><span>Assigned Projects</span></a>
+{{--                <a class="collapse-item" href="#"><i class="fas fa-circle"></i><span>Tasks &amp; Milestones</span></a>--}}
+{{--                <a class="collapse-item" href="#"><i class="fas fa-circle"></i><span>Project Documents</span></a>--}}
             </div></div>
         </li>
-        <li class="nav-item"><a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapsePMBookings" aria-expanded="false" aria-controls="collapsePMBookings"><i class="fas fa-fw fa-handshake"></i><span>Client Bookings</span></a><div id="collapsePMBookings" class="collapse" data-parent="#accordionSidebar"><div class="collapse-inner rounded"><a class="collapse-item" href="{{ route('booking-requests.index') }}"><i class="fas fa-circle"></i><span>Requests &amp; Payments</span></a></div></div></li>
+{{--        <li class="nav-item">--}}
+{{--            <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapsePMBookings" aria-expanded="false" aria-controls="collapsePMBookings">--}}
+{{--                <i class="fas fa-fw fa-handshake"></i>--}}
+{{--                <span>Client Bookings</span>--}}
+{{--            </a>--}}
+{{--            <div id="collapsePMBookings" class="collapse" data-parent="#accordionSidebar">--}}
+{{--                <div class="collapse-inner rounded">--}}
+{{--                    <a class="collapse-item" href="{{ route('booking-requests.index') }}">--}}
+{{--                        <i class="fas fa-circle"></i>--}}
+{{--                        <span>Requests &amp; Payments</span>--}}
+{{--                    </a>--}}
+{{--                </div>--}}
+{{--            </div>--}}
+{{--        </li>--}}
         <li class="nav-item"><a class="nav-link" href="{{ route('reports.finance') }}"><i class="fas fa-fw fa-chart-bar"></i><span>Project Financial Report</span></a></li>
     @elseif($roleId === 4)
         <li class="nav-item">
             <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseDesignWork" aria-expanded="false" aria-controls="collapseDesignWork"><i class="fas fa-fw fa-drafting-compass"></i><span>Design Work</span></a>
             <div id="collapseDesignWork" class="collapse" data-parent="#accordionSidebar"><div class="collapse-inner rounded">
-                <a class="collapse-item" href="{{ route('booking-requests.index') }}"><i class="fas fa-circle"></i><span>Assigned Projects &amp; Completion</span></a>
+                <a class="collapse-item" href="{{ route('booking-requests.index') }}"><i class="fas fa-circle"></i><span>Assigned Projects</span></a>
             </div></div>
         </li>
     @elseif($roleId === 7)
@@ -92,7 +105,7 @@
                 <a class="collapse-item" href="{{ route('reports.finance') }}"><i class="fas fa-circle"></i><span>Financial Reports</span></a>
             </div></div>
         </li>
-        <li class="nav-item"><a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseAccountBookings" aria-expanded="false" aria-controls="collapseAccountBookings"><i class="fas fa-fw fa-handshake"></i><span>Client Bookings</span></a><div id="collapseAccountBookings" class="collapse" data-parent="#accordionSidebar"><div class="collapse-inner rounded"><a class="collapse-item" href="{{ route('booking-requests.index') }}"><i class="fas fa-circle"></i><span>Requests &amp; Payments</span></a></div></div></li>
+        <li class="nav-item {{ request()->routeIs('booking-requests.*') ? 'active' : '' }}"><a class="nav-link" href="{{ route('booking-requests.index') }}"><i class="fas fa-fw fa-handshake"></i><span>Flat Purchase Requests</span></a></li>
     @elseif($roleId === 8)
         <li class="nav-item">
             <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseClientProjects" aria-expanded="false" aria-controls="collapseClientProjects"><i class="fas fa-fw fa-building"></i><span>My Flats</span></a>

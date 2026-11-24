@@ -15,67 +15,67 @@ class UserTableSeeder extends Seeder
         $arrUser = [
             [
                 'role_id'       => 1, // Admin
-                'full_name'     => 'System Admin',
-                'email'         => 'admin@gmail.com',
-                'phone'         => '0000000000',
+                'full_name'     => 'Mohon',
+                'email'         => 'mohon@gmail.com',
+                'phone'         => '01700000001',
                 'status'        => 1,
-                'show_password' => 'password',
+                'password_hash' => '12345678',
             ],
             [
                 'role_id'       => 2, // Project Manager
-                'full_name'     => 'Project Manager',
-                'email'         => 'pm@gmail.com',
-                'phone'         => '01700000001',
+                'full_name'     => 'Rabby',
+                'email'         => 'rabby@gmail.com',
+                'phone'         => '01700000002',
                 'status'        => 1,
-                'show_password' => 'password',
+                'password_hash' => '12345678',
             ],
             [
                 'role_id'       => 3, // Site Supervisor
                 'full_name'     => 'Site Supervisor',
-                'email'         => 'sv@gmail.com',
-                'phone'         => '01700000002',
+                'email'         => 'supervisor@gmail.com',
+                'phone'         => '01700000003',
                 'status'        => 1,
-                'show_password' => 'password',
+                'password_hash' => '12345678',
             ],
             [
                 'role_id'       => 4, // Designer
-                'full_name'     => 'Designer',
-                'email'         => 'designer@gmail.com',
-                'phone'         => '01700000003',
+                'full_name'     => 'Shihab',
+                'email'         => 'shihab@gmail.com',
+                'phone'         => '01700000004',
                 'status'        => 1,
-                'show_password' => 'password',
+                'password_hash' => '12345678',
             ],
             [
                 'role_id'       => 5, // Procurement
                 'full_name'     => 'Procurement Officer',
                 'email'         => 'procurement@gmail.com',
-                'phone'         => '01700000004',
+                'phone'         => '01700000005',
                 'status'        => 1,
-                'show_password' => 'password',
+                'password_hash' => '12345678',
             ],
             [
                 'role_id'       => 6, // Store Keeper
                 'full_name'     => 'Store Keeper',
                 'email'         => 'store@gmail.com',
-                'phone'         => '01700000005',
+                'phone'         => '01700000006',
                 'status'        => 1,
-                'show_password' => 'password',
+                'password_hash' => '12345678',
             ],
             [
                 'role_id'       => 7, // Accountant
-                'full_name'     => 'Accountant',
-                'email'         => 'accounts@gmail.com',
-                'phone'         => '01700000006',
+                'full_name'     => 'Shazid',
+                'email'         => 'shazid@gmail.com',
+                'phone'         => '01700000007',
                 'status'        => 1,
-                'show_password' => 'password',
+                'password_hash' => '12345678',
             ],
             [
                 'role_id'       => 8, // Client
-                'full_name'     => 'Demo Client',
-                'email'         => 'client@gmail.com',
-                'phone'         => '01700000007',
+                'full_name'     => 'jonaki',
+                'email'         => 'jonaki@gmail.com',
+                'phone'         => '01700000008',
                 'status'        => 1,
-                'show_password' => 'password',
+                'password_hash' => '12345678',
             ],
         ];
 
@@ -88,11 +88,11 @@ class UserTableSeeder extends Seeder
                     'full_name'     => $eachUser['full_name'],
                     'phone'         => $eachUser['phone'],
                     'status'        => $eachUser['status'],
-                    'password_hash' => Hash::make($eachUser['show_password']),
+                    'password_hash' => Hash::make($eachUser['password_hash']),
                 ]
             );
         }
 
-        $this->command->info('✅ Seeded ' . count($arrUser) . ' users (one per role). Password: "password"');
+        $this->command->info('✅ Seeded ' . count($arrUser) . ' users (one per role). Password: "12345678"');
     }
 }

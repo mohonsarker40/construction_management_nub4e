@@ -25,7 +25,6 @@ class Project extends Model
             'location' => ['required', 'string', 'max:255'],
             'budget' => ['required', 'numeric', 'min:0', 'max:9999999999.99'],
             'start_date' => ['required', 'date'],
-            'estimated_end_date' => ['required', 'date', 'after_or_equal:start_date'],
             'manager_user_id' => ['nullable', 'exists:users,id'],
             'designer_user_id' => ['required', 'exists:users,id'],
             'flats' => ['required', 'array', 'min:1'],
@@ -36,7 +35,9 @@ class Project extends Model
 
     public function listedUnits(): array
     {
-        return $this->flats()->orderBy('flat_name')->get()
+        return $this->flats()
+            ->orderBy('flat_name')
+            ->get()
             ->map(function ($line) {
                 return ['id' => $line->id, 'label' => $line->flat_name, 'price' => (float) $line->price];
             })->all();

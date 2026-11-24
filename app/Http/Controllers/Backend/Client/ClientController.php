@@ -14,7 +14,10 @@ class ClientController extends Controller
     public function index()
     {
         $records = Client::orderByDesc('id')->paginate(10);
-        $pendingRegistrations = User::where('role_id', 8)->where('status', 0)->orderBy('created_at')->get();
+        $pendingRegistrations = User::where('role_id', 8)
+            ->where('status', 0)
+            ->orderBy('created_at')
+            ->get();
 
         return view('Backend.clients.index', compact('records', 'pendingRegistrations'));
     }
@@ -74,7 +77,10 @@ class ClientController extends Controller
         DB::transaction(function () use ($user) {
             $account = User::whereKey($user->id)->lockForUpdate()->firstOrFail();
             abort_unless((int) $account->role_id === 8 && (int) $account->status === 0, 422);
-            $client = Client::where('user_id', $account->id)->orWhere('email', $account->email)->lockForUpdate()->first();
+            $client = Client::where('user_id', $account->id)
+                ->orWhere('email', $account->email)
+                ->lockForUpdate()
+                ->first();
             abort_if($client && $client->user_id && (int) $client->user_id !== (int) $account->id, 422, 'এই ইমেইল অন্য একটি ক্লায়েন্ট অ্যাকাউন্টের সঙ্গে যুক্ত।');
 
             $details = [
